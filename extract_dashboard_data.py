@@ -209,23 +209,47 @@ def get_sector_map():
                 mapping[str(row[sym_col]).strip()] = str(row[ind_col]).strip()
     return mapping
 
-def get_exec_history(xl):
-    try:
-        df = pd.read_excel(xl, sheet_name='Execution_History')
-        df = df.fillna('')
-        records = []
-        for _, row in df.iterrows():
-            records.append({
-                'month': str(row.get('Month','')),
-                'symbol': str(row.get('Symbol','')),
-                'action': str(row.get('Action','')),
-                'qty': int(row.get('Qty', 0)) if row.get('Qty','') != '' else 0,
-                'price': safe_float(row.get('Price', 0)),
-                'return': safe_float(row.get('Return', 0))
-            })
-        return records[-30:]  # last 30 trades
     except:
         return []
+
+def get_stock_correlation(symbols):
+    """Calculate daily return correlation matrix for the given symbols."""
+    if not symbols:
+        return {"symbols": [], "matrix": []}
+    
+    returns_map = {}
+    for sym in symbols:
+        found = False
+        for folder in ['nifty50_host', 'nifty500_host']:
+            path = os.path.join(folder, sym + '.csv') if not sym.endswith('.csv') else os.path.join(folder, sym)
+            if not os.path.exists(path):
+                path2 = os.path.join(folder, sym.replace('.csv','') + '.csv')
+                if os.path.exists(path2): path = path2
+                else: continue
+            try:
+                # Get last 120 days for a robust correlation
+                df = pd.read_csv(path).tail(120)
+                df.columns = [c.lower() for c in df.columns]
+                if len(df) > 10:
+                    df['ret'] = df['close'].pct_change()
+                    returns_map[sym.split('_')[0]] = df['ret'].dropna()
+                    found = True
+                    break
+            except: pass
+    
+    if not returns_map:
+        return {"symbols": [], "matrix": []}
+        
+    df_ret = pd.DataFrame(returns_map).dropna(how='all').fillna(0)
+    if df_ret.empty:
+        return {"symbols": [], "matrix": []}
+        
+    corr = df_ret.corr().round(3)
+    # Convert to list of lists for JSON
+    return {
+        "symbols": list(corr.columns),
+        "matrix": corr.values.tolist()
+    }
 
 # ============================================================
 # MAIN EXTRACTION
@@ -328,6 +352,9 @@ for universe in ['nifty50', 'nifty500']:
             clean = t['symbol'].split('_')[0]
             t['sector'] = sector_map.get(clean, 'Other')
     
+    # 10. Stock Correlation Matrix for Current Portfolio
+    stock_corr = get_stock_correlation(symbols)
+    
     output[universe] = {
         'exec_summary': exec_data,
         'avg_ex_ante_sr': avg_ex_ante_sr,
@@ -338,6 +365,7 @@ for universe in ['nifty50', 'nifty500']:
         'monthly_detail': monthly_detail,
         'current_portfolio': current_portfolio,
         'exec_history': exec_history,
+        'stock_correlation': stock_corr,
         'total_months': len(df_sum)
     }
     print(f"  [OK] {universe}: {len(df_sum)} months, Avg Ex-Ante Sharpe: {avg_ex_ante_sr}")

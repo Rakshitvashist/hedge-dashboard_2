@@ -480,43 +480,44 @@ function renderRollingSharpe(d) {
 }
 
 function renderCorrelation(d) {
-  const layers = Object.keys(LAYERS).filter(l => l !== 'Bench');
-  const md = d.monthly_detail;
-  
-  const matrix = layers.map(l1 => {
-    return layers.map(l2 => {
-      const r1 = md.map(r => r[l1] || 0);
-      const r2 = md.map(r => r[l2] || 0);
-      return calculateCorrelation(r1, r2);
-    });
-  });
-
+  const stockCorr = d.stock_correlation;
   const container = document.getElementById('correlation-container');
-  if (!container) return;
+  if (!container || !stockCorr || !stockCorr.symbols || stockCorr.symbols.length === 0) {
+    if (container) container.innerHTML = '<div class="crisis-card" style="text-align:center">No stock correlation data available.</div>';
+    return;
+  }
 
-  let html = '<div class="corr-grid" style="display:grid;grid-template-columns: repeat('+(layers.length+1)+', 1fr); gap:2px;">';
-  html += '<div></div>' + layers.map(l => `<div class="corr-label">${l}</div>`).join('');
+  const { symbols, matrix } = stockCorr;
+  const n = symbols.length;
+
+  // Update card title to reflect Stock Correlation
+  const titleEl = container.closest('.glass-card')?.querySelector('.card-title');
+  if (titleEl) titleEl.textContent = 'Current Portfolio Stock Correlation';
+
+  let html = `<div class="corr-grid-wrap">
+    <div class="corr-grid" style="display:grid; grid-template-columns: 60px repeat(${n}, 1fr); gap:1px; background:var(--border); border:1px solid var(--border)">`;
   
-  layers.forEach((l1, i) => {
-    html += `<div class="corr-label">${l1}</div>`;
-    matrix[i].forEach((val, j) => {
+  // Header row
+  html += '<div class="corr-corner" style="background:var(--bg-2)"></div>';
+  symbols.forEach(s => {
+    html += `<div class="corr-label-v" style="background:var(--bg-2); font-size:0.6rem; padding:4px; text-align:center; font-weight:700" title="${s}">${s}</div>`;
+  });
+  
+  // Data rows
+  matrix.forEach((row, i) => {
+    html += `<div class="corr-label-h" style="background:var(--bg-2); font-size:0.6rem; padding:4px; font-weight:700; border-right:1px solid var(--border)">${symbols[i]}</div>`;
+    row.forEach((val, j) => {
       const alpha = Math.abs(val);
       const bg = val > 0 ? `rgba(16,185,129,${alpha})` : `rgba(244,63,94,${alpha})`;
-      html += `<div class="corr-cell" style="background:${bg}" title="${l1} vs ${layers[j]}: ${val.toFixed(2)}">${val.toFixed(2)}</div>`;
+      const color = alpha > 0.4 ? '#fff' : 'var(--text-1)';
+      html += `<div class="corr-cell" style="background:${bg}; color:${color}; font-family:var(--font-mono); font-size:0.55rem; display:flex; align-items:center; justify-content:center; min-height:24px" title="${symbols[i]} vs ${symbols[j]}: ${val}">${val.toFixed(2)}</div>`;
     });
   });
-  html += '</div>';
+  
+  html += '</div></div>';
   container.innerHTML = html;
 }
 
-function calculateCorrelation(x, y) {
-  const n = x.length;
-  const muX = x.reduce((a,b)=>a+b,0)/n;
-  const muY = y.reduce((a,b)=>a+b,0)/n;
-  const num = x.reduce((acc,xi,i) => acc + (xi-muX)*(y[i]-muY), 0);
-  const den = Math.sqrt(x.reduce((a,xi)=>a+Math.pow(xi-muX,2),0) * y.reduce((a,yi)=>a+Math.pow(yi-muY,2),0));
-  return den === 0 ? 0 : num/den;
-}
 
 function renderAttribution(d) {
   const history = d.exec_history || [];

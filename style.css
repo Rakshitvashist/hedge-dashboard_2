@@ -726,3 +726,9 @@ body::before {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(34,211,238,.3); }
+
+/* Correlation Matrix Styles */
+.corr-grid-wrap { overflow-x: auto; max-width: 100%; border-radius: 8px; }
+.corr-label-v { writing-mode: vertical-lr; transform: rotate(180deg); min-height: 80px; white-space: nowrap; }
+.corr-cell { transition: transform 0.1s; }
+.corr-cell:hover { transform: scale(1.1); z-index: 10; border: 1px solid #fff; }
