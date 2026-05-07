@@ -1,66 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Institutional Hedge Dashboard | SOM</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOM Institutional Analytics | Hedge Dashboard</title>
+<meta name="description" content="Institutional-grade hedge portfolio analytics — Sharp Efficient Model (SOM)">
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div>
-                <h1>Institutional Hedge Analytics</h1>
-                <p id="last-refresh" style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;"></p>
-            </div>
-            <div class="controls">
-                <button class="btn-toggle active" onclick="switchMode('nifty50')">Nifty 50</button>
-                <button class="btn-toggle" onclick="switchMode('nifty500')">Nifty 500</button>
-            </div>
-        </header>
+<div class="container">
 
-        <div class="stats-grid" id="summary-stats">
-            <!-- Dynamic Stats -->
-        </div>
-
-        <div class="charts-grid">
-            <div class="chart-card">
-                <p class="chart-title">Equity Growth (Institutional Ultra Hedge)</p>
-                <div style="height: 320px;">
-                    <canvas id="equityChart"></canvas>
-                </div>
-            </div>
-            <div class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                <p class="stat-label">Portfolio Change (Today)</p>
-                <p id="portfolio-day-change" class="stat-value">+0.00%</p>
-                <div style="height: 200px; width: 100%; margin-top: 20px;">
-                    <canvas id="sectorChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="data-table-card">
-            <p class="chart-title">Live Portfolio Monitoring (Daily Updates)</p>
-            <table id="liveTable">
-                <thead>
-                    <tr>
-                        <th>Symbol</th>
-                        <th>LTP</th>
-                        <th>Today's Chg %</th>
-                        <th>Last Update</th>
-                        <th>Qty</th>
-                    </tr>
-                </thead>
-                <tbody id="liveBody">
-                    <!-- Dynamic Rows -->
-                </tbody>
-            </table>
-        </div>
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <h1>SOM Institutional Analytics</h1>
+      <p id="last-refresh">Loading data...</p>
     </div>
+    <div class="header-right">
+      <div class="toggle-bar">
+        <button class="btn-toggle active" id="btn-n50" onclick="switchUniverse('nifty50')">Nifty 50</button>
+        <button class="btn-toggle" id="btn-n500" onclick="switchUniverse('nifty500')">Nifty 500</button>
+      </div>
+    </div>
+  </header>
 
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+    <button class="tab-btn" onclick="switchTab('layers')">All Layers</button>
+    <button class="tab-btn" onclick="switchTab('equity')">Equity Curves</button>
+    <button class="tab-btn" onclick="switchTab('heatmap')">Heatmap</button>
+    <button class="tab-btn" onclick="switchTab('portfolio')">Live Portfolio</button>
+    <button class="tab-btn" onclick="switchTab('trades')">Execution Log</button>
+  </div>
+
+  <!-- TAB: OVERVIEW -->
+  <div id="tab-overview" class="tab-pane active">
+    <div class="kpi-grid" id="kpi-row"></div>
+    <div class="charts-row">
+      <div class="card">
+        <p class="card-title">Cumulative Equity — All Layers</p>
+        <div class="chart-wrap"><canvas id="equityOverview"></canvas></div>
+      </div>
+      <div class="card">
+        <p class="card-title">Current Portfolio Sector Mix</p>
+        <div class="chart-wrap"><canvas id="sectorPie"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">Monthly Returns — ULTRA Defense Layer</p>
+      <div class="chart-wrap" style="height:200px"><canvas id="barMonthly"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TAB: ALL LAYERS -->
+  <div id="tab-layers" class="tab-pane">
+    <div class="card" style="margin-bottom:1.5rem">
+      <p class="card-title">Layer Performance Comparison</p>
+      <div class="layer-table-wrap">
+        <table class="layer-table" id="layerTable">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>CAGR %</th>
+              <th>Volatility %</th>
+              <th>Sharpe</th>
+              <th>Sortino</th>
+              <th>Calmar</th>
+              <th>Max DD %</th>
+              <th>Win Rate %</th>
+              <th>Avg Gain %</th>
+              <th>Avg Loss %</th>
+              <th>Alpha %</th>
+              <th>Total Ret %</th>
+            </tr>
+          </thead>
+          <tbody id="layerTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">Executive Summary — All Metrics per Layer</p>
+      <div style="overflow-x:auto">
+        <table class="exec-table" id="execTable">
+          <thead id="execTableHead"></thead>
+          <tbody id="execTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: EQUITY CURVES -->
+  <div id="tab-equity" class="tab-pane">
+    <div class="card" style="margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem">
+        <p class="card-title" style="margin:0">Cumulative Equity Growth (Starting ₹1)</p>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap" id="equityLayerToggles"></div>
+      </div>
+      <div class="chart-wrap" style="height:380px"><canvas id="equityMain"></canvas></div>
+    </div>
+    <div class="card">
+      <p class="card-title">Avg Ex-Ante Sharpe Over Time</p>
+      <div class="chart-wrap" style="height:200px"><canvas id="sharpeChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TAB: HEATMAP -->
+  <div id="tab-heatmap" class="tab-pane">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:1rem">
+        <p class="card-title" style="margin:0">Monthly Return Heatmap</p>
+        <select class="heatmap-select" id="heatmapLayerSelect" onchange="renderHeatmap()">
+          <option value="ULTRA_HEDGE">ULTRA Defense</option>
+          <option value="COMBO_HEDGE">COMBO + Hedge</option>
+          <option value="ULTRA">ULTRA Layer</option>
+          <option value="COMBO">COMBO Filter</option>
+          <option value="EMA">EMA Filter</option>
+          <option value="ST">ST Filter</option>
+          <option value="Base">Base SIM</option>
+          <option value="Bench">Benchmark</option>
+        </select>
+      </div>
+      <div class="heatmap-wrap" id="heatmapContainer"></div>
+    </div>
+  </div>
+
+  <!-- TAB: LIVE PORTFOLIO -->
+  <div id="tab-portfolio" class="tab-pane">
+    <div class="kpi-grid" id="portfolioKpis"></div>
+    <div class="portfolio-grid">
+      <div class="card">
+        <p class="card-title">Live Holdings — Daily Performance</p>
+        <div id="liveTickerList"></div>
+      </div>
+      <div class="card">
+        <p class="card-title">Sector Allocation</p>
+        <div class="chart-wrap" style="height:280px"><canvas id="portfolioSector"></canvas></div>
+        <div style="margin-top:1rem">
+          <p class="card-title">Portfolio Beta &amp; Sharpe</p>
+          <div id="portStats" style="display:flex;gap:2rem;flex-wrap:wrap;margin-top:0.5rem"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">Holdings Detail</p>
+      <div style="overflow-x:auto">
+        <table class="data-table" id="holdingsTable">
+          <thead>
+            <tr>
+              <th>Symbol</th><th>Sector</th><th>Weight %</th>
+              <th>Beta</th><th>ERB</th><th>LTP</th>
+              <th>Today %</th><th>Status</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="holdingsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: EXECUTION LOG -->
+  <div id="tab-trades" class="tab-pane">
+    <div class="card">
+      <p class="card-title">Execution History (Last 30 Trades)</p>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Month</th><th>Symbol</th><th>Sector</th>
+              <th>Action</th><th>Qty</th><th>Price</th><th>Return %</th>
+            </tr>
+          </thead>
+          <tbody id="tradesBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+<script src="data.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
