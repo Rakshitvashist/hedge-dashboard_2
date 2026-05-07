@@ -462,7 +462,7 @@ function renderPortfolio(d) {
       <td>${num(s.erb)}</td>
       <td>${s.ltp > 0 ? '₹' + s.ltp.toFixed(2) : '—'}</td>
       <td class="${s.change_pct >= 0 ? 'pos' : 'neg'}">${s.change_pct >= 0 ? '+' : ''}${s.change_pct.toFixed(2)}%</td>
-      <td><span style="color:${s.status === 'Added' ? 'var(--positive)' : 'var(--light)';font-size:0.75rem}">${s.status}</span></td>
+      <td><span style="color:${s.status === 'Added' ? 'var(--positive)' : 'var(--light)'};font-size:0.75rem">${s.status}</span></td>
       <td class="${s.action.includes('BUY') ? 'badge-buy' : s.action.includes('SELL') ? 'badge-sell' : 'badge-hold'}">${s.action}</td>
     </tr>
   `).join('');
