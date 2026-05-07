@@ -425,9 +425,13 @@ function renderExecTable(d) {
 ══════════════════════════════════════════════ */
 function renderChurning(d) {
   const rawChurn = d.churning_data || [];
-  // Strict filter: Month must be a string like "2021-04"
+  // Strict filter: Month must be a string like "2021-04" (YYYY-MM)
   const monthRegex = /^\d{4}-\d{2}$/;
-  const churn = rawChurn.filter(r => r.Month && typeof r.Month === 'string' && monthRegex.test(r.Month));
+  const churn = rawChurn.filter(r => {
+    const m = String(r.Month || '').trim();
+    return monthRegex.test(m);
+  });
+  console.log(`[Churning] Filtered ${rawChurn.length} down to ${churn.length} valid months.`);
   
   const sorted = [...churn].sort((a,b) => a.Month > b.Month ? 1 : -1);
 
