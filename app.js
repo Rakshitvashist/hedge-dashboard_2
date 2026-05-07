@@ -425,9 +425,31 @@ function renderExecTable(d) {
 ══════════════════════════════════════════════ */
 function renderChurning(d) {
   const rawChurn = d.churning_data || [];
-  // Filter out invalid months (0.0 or empty)
-  const churn = rawChurn.filter(r => r.Month && typeof r.Month === 'string' && r.Month.length > 4);
+  // Strict filter: Month must be a string like "2021-04"
+  const monthRegex = /^\d{4}-\d{2}$/;
+  const churn = rawChurn.filter(r => r.Month && typeof r.Month === 'string' && monthRegex.test(r.Month));
+  
   const sorted = [...churn].sort((a,b) => a.Month > b.Month ? 1 : -1);
+
+  // Calculate Churning Statistics
+  const avgAdd = churn.length ? churn.reduce((a, b) => a + (b['Base Add'] || 0), 0) / churn.length : 0;
+  const avgRem = churn.length ? churn.reduce((a, b) => a + (b['Base Rem'] || 0), 0) / churn.length : 0;
+  const maxAdd = churn.length ? Math.max(...churn.map(r => r['Base Add'] || 0)) : 0;
+  const maxRem = churn.length ? Math.max(...churn.map(r => r['Base Rem'] || 0)) : 0;
+
+  const kpiEl = document.getElementById('churnKpis');
+  if (kpiEl) {
+    kpiEl.innerHTML = [
+      { label: 'Avg Add (Base)', val: avgAdd, color: 'emerald' },
+      { label: 'Avg Rem (Base)', val: avgRem, color: 'rose' },
+      { label: 'Max Add',        val: maxAdd, color: 'cyan' },
+      { label: 'Max Rem',        val: maxRem, color: 'gold' }
+    ].map(k => `
+      <div class="kpi-card" style="--accent: var(--${k.color})">
+        <span class="kpi-label">${k.label}</span>
+        <span class="kpi-value text-${k.color}">${k.val.toFixed(2)}</span>
+      </div>`).join('');
+  }
 
   document.getElementById('churningBody').innerHTML = [...sorted].reverse().map(r => `
     <tr>
