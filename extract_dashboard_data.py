@@ -229,6 +229,8 @@ def get_exec_history(xl):
 
 def get_stock_correlation(symbols):
     """Calculate daily return correlation matrix for the given symbols."""
+    # Filter out header garbage like 'Stock'
+    symbols = [s for s in symbols if s and s not in ('Stock', 'nan', 'None')]
     if not symbols:
         return {"symbols": [], "matrix": []}
     
@@ -245,6 +247,13 @@ def get_stock_correlation(symbols):
                 # Get last 120 days for a robust correlation
                 df = pd.read_csv(path).tail(120)
                 df.columns = [c.lower() for c in df.columns]
+                
+                # IMPORTANT: Use date as index to align different stocks
+                date_col = 'date' if 'date' in df.columns else 'time'
+                if date_col in df.columns:
+                    df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
+                    df.set_index(date_col, inplace=True)
+                
                 if len(df) > 10:
                     df['ret'] = df['close'].pct_change()
                     returns_map[sym.split('_')[0]] = df['ret'].dropna()
@@ -255,10 +264,14 @@ def get_stock_correlation(symbols):
     if not returns_map:
         return {"symbols": [], "matrix": []}
         
-    df_ret = pd.DataFrame(returns_map).dropna(how='all').fillna(0)
+    # Align by date index
+    df_ret = pd.DataFrame(returns_map).dropna(how='all')
     if df_ret.empty:
         return {"symbols": [], "matrix": []}
         
+    # Fill missing values with 0 to allow correlation calculation if some days are missing
+    df_ret = df_ret.fillna(0)
+    
     corr = df_ret.corr().round(3)
     # Convert to list of lists for JSON
     return {
