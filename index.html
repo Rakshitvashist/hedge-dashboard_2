@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Institutional Hedge Dashboard | SOM</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Institutional Hedge Analytics</h1>
+                <p id="last-refresh" style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;"></p>
+            </div>
+            <div class="controls">
+                <button class="btn-toggle active" onclick="switchMode('nifty50')">Nifty 50</button>
+                <button class="btn-toggle" onclick="switchMode('nifty500')">Nifty 500</button>
+            </div>
+        </header>
+
+        <div class="stats-grid" id="summary-stats">
+            <!-- Dynamic Stats -->
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <p class="chart-title">Equity Growth (Institutional Ultra Hedge)</p>
+                <div style="height: 320px;">
+                    <canvas id="equityChart"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <p class="stat-label">Portfolio Change (Today)</p>
+                <p id="portfolio-day-change" class="stat-value">+0.00%</p>
+                <div style="height: 200px; width: 100%; margin-top: 20px;">
+                    <canvas id="sectorChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table-card">
+            <p class="chart-title">Live Portfolio Monitoring (Daily Updates)</p>
+            <table id="liveTable">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>LTP</th>
+                        <th>Today's Chg %</th>
+                        <th>Last Update</th>
+                        <th>Qty</th>
+                    </tr>
+                </thead>
+                <tbody id="liveBody">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
