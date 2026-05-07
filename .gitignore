@@ -1,0 +1,26 @@
+# Data Files
+*.xlsx
+*.csv
+*.parquet
+futures_parquet/
+spot_parquet/
+nifty500_host/
+nifty50_host/
+scratch/
+
+# Build and Dependencies
+node_modules/
+dist/
+
+# Python Environment
+host/
+__pycache__/
+*.pyc
+
+# IDEs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,21 @@
+{
+  "name": "som-institutional-dashboard",
+  "version": "1.0.0",
+  "description": "Premium institutional-grade hedge portfolio analytics dashboard.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "validate": "node backend/validator.js"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "countup.js": "^2.8.0",
+    "lucide": "^0.292.0",
+    "particles.js": "^2.0.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
