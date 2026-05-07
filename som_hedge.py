@@ -28,8 +28,12 @@ DEEP_DIVE_FILE   = os.environ.get("DEEP_DIVE_FILE", "Hedge_Institutional_Deep_Di
 
 # Backtest period
 START_MONTH      = "2021-04"
-# Analysis ends at the previous month to allow current month to be the 'Live Performance' month
-END_MONTH        = datetime.now().strftime("%Y-%m") 
+# END_MONTH is the last *analysis* month whose trade_month (port_month+1) is the current live month.
+# We stop at (current_month - 1) so that trade_month never goes beyond the current calendar month.
+_now             = datetime.now()
+_prev_month      = (_now.replace(day=1) - timedelta(days=1))
+END_MONTH        = _prev_month.strftime("%Y-%m")  # e.g. if now=May, END_MONTH=2026-04
+LIVE_MONTH       = _now.strftime("%Y-%m")         # e.g. 2026-05 — the current live trade month
 
 # Parameters
 MAX_WEIGHT       = 0.10     # Max 10% per stock
@@ -764,9 +768,9 @@ df_audit = pd.DataFrame(portfolio_audit_log)
 STATUS_COLORS = {'Added': "C6EFCE", 'Remained': "DDEBF7"} # Green for Added, Light Blue for Remained
 
 for t_month in df_audit['Trade_Month'].unique():
-    # A month is 'LIVE' if it is the latest Trade_Month and we are currently in or before that month
-    curr_m = datetime.now().strftime('%Y-%m')
-    is_live = (t_month >= curr_m)
+    # A month is 'LIVE' only if it exactly matches the current calendar month.
+    # Any future month (which should not exist after the END_MONTH fix) falls back to Port_.
+    is_live = (t_month == LIVE_MONTH)
     sheet_name = f"Port_{t_month}" if not is_live else f"LIVE_PERF_{t_month}"
     ws_port = wb.create_sheet(sheet_name)
     m_data = df_audit[df_audit['Trade_Month'] == t_month].sort_values('Weight', ascending=False)

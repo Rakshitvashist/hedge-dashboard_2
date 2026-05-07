@@ -2,6 +2,11 @@
 # Institutional Hedge Strategy - Automated Daily Pipeline (Institutional_Run)
 # ==============================================================================
 
+# Set UTF-8 encoding so Python emoji/unicode print statements don't crash
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$env:PYTHONIOENCODING = "utf-8"
+
 Write-Host "`n[*] Starting Institutional_Run Pipeline..." -ForegroundColor Cyan
 
 # 1. Download Stock Data (Nifty 50 & Nifty 500)
@@ -13,10 +18,8 @@ python data_set_nifty500.py
 Write-Host "`n[2/5] Downloading Index Data..." -ForegroundColor Yellow
 python index_data.py
 
-# Reminder for Manual Bond Update
-Write-Host "`n[!] ATTENTION: Please ensure 'India 1-Year Bond Yield Historical Data.csv' is updated manually if needed." -ForegroundColor Magenta
-Write-Host "Press any key to continue after checking bond data..." -ForegroundColor Gray
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+# Reminder for Manual Bond Update (non-blocking)
+Write-Host "`n[NOTE] Make sure 'India 1-Year Bond Yield Historical Data.csv' is up to date." -ForegroundColor Yellow
 
 # 3. Run Strategy Engine (Generate Reports)
 Write-Host "`n[3/5] Running SOM Hedge Backtester..." -ForegroundColor Yellow

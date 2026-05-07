@@ -94,12 +94,28 @@ def get_heatmap_data(df_sum, layer_col):
     return result
 
 def get_current_portfolio(xl, sector_map):
-    """Get the current live portfolio with sector mapping."""
+    """Get the current live portfolio with sector mapping.
+    
+    Picks the LIVE_PERF_ sheet whose suffix matches the current calendar month
+    (YYYY-MM).  If none matches (e.g. month just rolled), falls back to the
+    most recent Port_ sheet so the dashboard never shows a future portfolio.
+    """
     sheets = xl.sheet_names
     live_sheets = [s for s in sheets if s.startswith('LIVE_PERF_')]
     port_sheets = [s for s in sheets if s.startswith('Port_')]
 
-    target_sheet = live_sheets[-1] if live_sheets else (port_sheets[-1] if port_sheets else None)
+    curr_month = datetime.now().strftime('%Y-%m')   # e.g. '2026-05'
+
+    # Prefer the live sheet whose suffix is exactly the current month
+    current_live = next(
+        (s for s in live_sheets if s.endswith(curr_month)), None
+    )
+    # If no exact match, take the last live sheet that is NOT in the future
+    if current_live is None:
+        past_live = [s for s in live_sheets if s.replace('LIVE_PERF_', '') <= curr_month]
+        current_live = past_live[-1] if past_live else None
+
+    target_sheet = current_live if current_live else (port_sheets[-1] if port_sheets else None)
     if not target_sheet:
         return []
 
