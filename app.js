@@ -481,6 +481,7 @@ function renderRollingSharpe(d) {
 
 function renderCorrelation(d) {
   const stockCorr = d.stock_correlation;
+  console.log('[Correlation] Data:', stockCorr);
   const container = document.getElementById('correlation-container');
   if (!container || !stockCorr || !stockCorr.symbols || stockCorr.symbols.length === 0) {
     if (container) container.innerHTML = '<div class="crisis-card" style="text-align:center">No stock correlation data available.</div>';
