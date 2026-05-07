@@ -554,7 +554,7 @@ function renderCrisis(d) {
   if (!container) return;
 
   const md = d.monthly_detail;
-  const layers = Object.keys(LAYERS); // All 8 including Bench
+  const layers = Object.keys(LAYERS).filter(l => l !== 'Bench');
 
   container.innerHTML = `
     <div class="crisis-grid">
@@ -562,24 +562,38 @@ function renderCrisis(d) {
         const row = md.find(r => r.Month.startsWith(e.date));
         if (!row) return `<div class="crisis-card">Data missing for ${e.name}</div>`;
         
+        const benchRet = (row.Bench || 0) * 100;
+        
         return `
           <div class="crisis-card">
             <div class="crisis-name">${e.name} (${e.date})</div>
-            <div class="crisis-meta">Real-world performance of all layers:</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.5rem">
+            <div class="crisis-meta" style="margin-bottom:1rem">Benchmark: <b class="text-rose">${benchRet.toFixed(1)}%</b></div>
+            
+            <div style="display:flex; flex-direction:column; gap:0.4rem">
+              <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:var(--slate); padding-bottom:2px; border-bottom:1px solid var(--border)">
+                <span>LAYER</span>
+                <span>RETURN | PROTECTION</span>
+              </div>
               ${layers.map(l => {
-                const val = (row[l] || 0) * 100;
+                const lRet = (row[l] || 0) * 100;
+                const prot = lRet - benchRet;
                 return `
-                  <div class="mono" style="font-size:0.65rem; display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05)">
-                    <span style="color:var(--slate)">${l}</span>
-                    <span class="${val >= 0 ? 'text-emerald' : 'text-rose'}">${val >= 0 ? '+' : ''}${val.toFixed(1)}%</span>
+                  <div class="mono" style="font-size:0.7rem; display:flex; justify-content:space-between; align-items:center">
+                    <span class="ltag ${LAYERS[l].cls}" style="font-size:0.55rem">${LAYERS[l].label}</span>
+                    <span>
+                      <span class="${lRet >= 0 ? 'text-emerald' : 'text-rose'}">${lRet >= 0 ? '+' : ''}${lRet.toFixed(1)}%</span>
+                      <span class="text-cyan" style="margin-left:0.5rem; font-weight:700">(${prot >= 0 ? '+' : ''}${prot.toFixed(1)}%)</span>
+                    </span>
                   </div>
                 `;
               }).join('')}
             </div>
-            <div class="crisis-stat" style="margin-top:1rem; border-top:1px solid var(--border); padding-top:0.5rem">
-              Benchmark: <span class="text-rose">${((row.Bench || 0)*100).toFixed(1)}%</span> | 
-              Model Alpha: <span class="text-emerald">+${(((row.Base || 0) - (row.Bench || 0))*100).toFixed(1)}%</span>
+            
+            <div class="crisis-stat" style="margin-top:1.25rem; background:rgba(34,211,238,0.05); padding:0.5rem; border-radius:0.4rem; text-align:center">
+              <span style="font-size:0.65rem; color:var(--cyan); font-weight:700">SHIELD EFFICACY:</span>
+              <span class="text-emerald" style="font-size:0.8rem; font-weight:800; margin-left:0.5rem">
+                +${(Math.max(...layers.map(l => (row[l]||0)*100 - benchRet))).toFixed(1)}% Max Defense
+              </span>
             </div>
           </div>
         `;
