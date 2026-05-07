@@ -11,7 +11,19 @@ const LAYERS = {
   Bench:       { label: 'Benchmark',     color: 'rgba(255,255,255,0.3)', cls: 'ltag-bench' }
 };
 
-let state = { universe: 'nifty50', tab: 'overview', heatLayer: 'ULTRA_HEDGE' };
+let state = { 
+  universe: 'nifty50', 
+  tab: 'overview', 
+  heatLayer: 'ULTRA_HEDGE',
+  chartTypes: {
+    equityOverview: 'line',
+    betaChart: 'bar',
+    winRateChart: 'bar',
+    equityMain: 'line',
+    churnAddChart: 'line',
+    churnRemChart: 'line'
+  }
+};
 const charts = {};
 
 /* ── GLOBALS ─────────────────────────────────── */
@@ -29,19 +41,41 @@ function switchTab(tab) {
   renderTab(tab);
 }
 
+function switchChartType(id, type) {
+  state.chartTypes[id] = type;
+  renderTab(state.tab);
+}
+
 function closeModal() {
   document.getElementById('hmModal').classList.remove('open');
 }
 
 window.switchUniverse = switchUniverse;
 window.switchTab = switchTab;
+window.switchChartType = switchChartType;
 window.closeModal = closeModal;
 
 /* ── CHART HELPER ────────────────────────────── */
-function mkChart(id, type, data, options) {
+function mkChart(id, defaultType, data, options) {
   const el = document.getElementById(id);
   if (!el) return;
   if (charts[id]) { charts[id].destroy(); }
+
+  const type = state.chartTypes[id] || defaultType;
+  
+  // Custom tweaks for "Dot" chart (which is just a line chart with no lines)
+  if (type === 'dot') {
+    data.datasets.forEach(ds => {
+      ds.showLine = false;
+      ds.pointRadius = 4;
+    });
+  } else if (type === 'line') {
+    data.datasets.forEach(ds => {
+      ds.showLine = true;
+      ds.pointRadius = id.includes('equity') ? 0 : 2;
+    });
+  }
+
   const defaults = {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } } },
@@ -50,7 +84,34 @@ function mkChart(id, type, data, options) {
       y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b' } }
     }
   };
-  charts[id] = new Chart(el.getContext('2d'), { type, data, options: Object.assign({}, defaults, options) });
+
+  charts[id] = new Chart(el.getContext('2d'), { 
+    type: type === 'dot' ? 'line' : type, 
+    data, 
+    options: Object.assign({}, defaults, options) 
+  });
+
+  renderChartControls(id);
+}
+
+function renderChartControls(id) {
+  const container = document.querySelector(`.chart-controls[data-for="${id}"]`);
+  if (!container) return;
+
+  const current = state.chartTypes[id] || 'line';
+  const types = [
+    { id: 'line', icon: '📈', label: 'Line' },
+    { id: 'bar',  icon: '📊', label: 'Bar' },
+    { id: 'dot',  icon: '●', label: 'Dots' }
+  ];
+
+  container.innerHTML = types.map(t => `
+    <button class="chart-control-btn ${current === t.id ? 'active' : ''}" 
+            onclick="switchChartType('${id}', '${t.id}')" 
+            title="${t.label}">
+      ${t.icon}
+    </button>
+  `).join('');
 }
 
 /* ── DATA ACCESSOR ───────────────────────────── */

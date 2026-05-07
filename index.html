@@ -73,8 +73,11 @@
       <div class="grid-2-1" style="margin-top:1.5rem">
         <div class="glass-card">
           <div class="card-header">
-            <h3 class="card-title">Institutional Equity Curves</h3>
-            <span class="card-sub">All 7 Layers vs Benchmark</span>
+            <div>
+              <h3 class="card-title">Institutional Equity Curves</h3>
+              <span class="card-sub">All 7 Layers vs Benchmark</span>
+            </div>
+            <div class="chart-controls" data-for="equityOverview"></div>
           </div>
           <div class="chart-area">
             <canvas id="equityOverview"></canvas>
@@ -95,8 +98,11 @@
       <div class="grid-2" style="margin-top:1.5rem">
         <div class="glass-card">
           <div class="card-header">
-            <h3 class="card-title">Rolling Portfolio Beta</h3>
-            <span class="card-sub">Last 12 months</span>
+            <div>
+              <h3 class="card-title">Rolling Portfolio Beta</h3>
+              <span class="card-sub">Last 12 months</span>
+            </div>
+            <div class="chart-controls" data-for="betaChart"></div>
           </div>
           <div class="chart-area-sm">
             <canvas id="betaChart"></canvas>
@@ -104,8 +110,11 @@
         </div>
         <div class="glass-card">
           <div class="card-header">
-            <h3 class="card-title">Win Rate by Layer</h3>
-            <span class="card-sub">% Positive Months</span>
+            <div>
+              <h3 class="card-title">Win Rate by Layer</h3>
+              <span class="card-sub">% Positive Months</span>
+            </div>
+            <div class="chart-controls" data-for="winRateChart"></div>
           </div>
           <div class="chart-area-sm">
             <canvas id="winRateChart"></canvas>
@@ -138,8 +147,11 @@
     <section id="tab-equity" class="tab-pane">
       <div class="glass-card">
         <div class="card-header">
-          <h3 class="card-title">Full Backtest Equity Curves</h3>
-          <span class="card-sub">Cumulative growth of ₹1 invested</span>
+          <div>
+            <h3 class="card-title">Full Backtest Equity Curves</h3>
+            <span class="card-sub">Cumulative growth of ₹1 invested</span>
+          </div>
+          <div class="chart-controls" data-for="equityMain"></div>
         </div>
         <div style="height:500px">
           <canvas id="equityMain"></canvas>
@@ -203,6 +215,7 @@
         <div class="glass-card">
           <div class="card-header">
             <h3 class="card-title">Stock Additions by Layer</h3>
+            <div class="chart-controls" data-for="churnAddChart"></div>
           </div>
           <div class="chart-area">
             <canvas id="churnAddChart"></canvas>
@@ -211,6 +224,7 @@
         <div class="glass-card">
           <div class="card-header">
             <h3 class="card-title">Stock Removals by Layer</h3>
+            <div class="chart-controls" data-for="churnRemChart"></div>
           </div>
           <div class="chart-area">
             <canvas id="churnRemChart"></canvas>
