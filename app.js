@@ -331,7 +331,7 @@ function renderExecTable(d) {
   if (!el) return;
   const summary = d.exec_summary;
   const layers7 = ['Base','ST','EMA','COMBO','ULTRA','COMBO_HEDGE','ULTRA_HEDGE'];
-  const metrics = Object.keys(summary);
+  const metrics = Object.keys(summary).filter(m => m !== 'Sharpe' && m !== 'Sortino');
 
   el.innerHTML = `
     <thead>
