@@ -192,11 +192,13 @@ function renderTab(tab) {
   if (!d) return;
   if (tab === 'overview')  renderOverview(d);
   if (tab === 'heatmap')   renderHeatmaps(d);
-  if (tab === 'equity')    renderEquity(d);
+  if (tab === 'performance') renderPerformance(d);
   if (tab === 'layers')    renderLayers(d);
   if (tab === 'churning')  renderChurning(d);
   if (tab === 'portfolio') renderPortfolio(d);
   if (tab === 'trades')    renderTrades(d);
+  
+  renderRegimeBadge(d);
 }
 
 /* ══════════════════════════════════════════════
@@ -394,6 +396,12 @@ window.openHeatModal = openHeatModal;
 /* ══════════════════════════════════════════════
    EQUITY CURVES
 ══════════════════════════════════════════════ */
+function renderPerformance(d) {
+  renderEquity(d);
+  renderDrawdown(d);
+  renderRollingSharpe(d);
+}
+
 function renderEquity(d) {
   const ec = d.equity_curves;
   const datasets = Object.keys(LAYERS).map(l => ({
@@ -402,7 +410,6 @@ function renderEquity(d) {
     borderDash: l === 'Bench' ? [6,4] : [],
     pointRadius: 0, tension: 0.3, fill: false
   }));
-  console.log(`[Equity Main] Rendering ${datasets.length} layers.`);
 
   mkChart('equityMain', 'line', {
     labels: ec.months,
@@ -411,6 +418,81 @@ function renderEquity(d) {
        scales: { y: { callback: v => '₹' + v.toFixed(2) } } 
   });
 }
+
+function renderDrawdown(d) {
+  const ec = d.equity_curves;
+  const labels = ec.months;
+  
+  const datasets = Object.keys(LAYERS).map(l => {
+    const vals = ec[l] || [];
+    let max = -Infinity;
+    const dd = vals.map(v => {
+      if (v > max) max = v;
+      return max === 0 ? 0 : -((max - v) / max * 100);
+    });
+    return {
+      label: LAYERS[l].label, data: dd,
+      borderColor: LAYERS[l].color, borderWidth: 1.5,
+      fill: true, backgroundColor: LAYERS[l].color + '11',
+      pointRadius: 0, tension: 0.2
+    };
+  });
+
+  mkChart('drawdownChart', 'line', { labels, datasets }, {
+    plugins: { legend: { display: false } },
+    scales: { y: { ticks: { callback: v => v.toFixed(1) + '%' } } }
+  });
+}
+
+function renderRollingSharpe(d) {
+  const md = d.monthly_detail;
+  const window = 12;
+  const labels = md.slice(window).map(r => r.Month.slice(0, 7));
+  
+  const datasets = Object.keys(LAYERS).filter(l => l !== 'Bench').map(l => {
+    const rolling = [];
+    for (let i = window; i < md.length; i++) {
+      const slice = md.slice(i - window, i);
+      const rets = slice.map(r => r[l] || 0);
+      const avg = rets.reduce((a,b) => a+b,0) / window;
+      const std = Math.sqrt(rets.map(x => Math.pow(x - avg, 2)).reduce((a,b) => a+b,0) / window);
+      const sr = std === 0 ? 0 : (avg * Math.sqrt(12)) / (std * Math.sqrt(12) || 1); // Simplified annual SR
+      rolling.push(+sr.toFixed(2));
+    }
+    return {
+      label: LAYERS[l].label, data: rolling,
+      borderColor: LAYERS[l].color, borderWidth: 2, pointRadius: 0, tension: 0.4, fill: false
+    };
+  });
+
+  mkChart('rollingSharpeChart', 'line', { labels, datasets }, {
+    plugins: { legend: { display: false } }
+  });
+}
+
+function renderRegimeBadge(d) {
+  const badge = document.getElementById('regime-badge');
+  if (!badge) return;
+  
+  const base = d.layer_metrics.Base;
+  const alpha = base.Alpha || 0;
+  
+  let label = 'Neutral';
+  let cls = 'neutral';
+  
+  if (alpha > 5) { label = 'Bullish Mode'; cls = 'bull'; }
+  else if (alpha > 0) { label = 'Positive Bias'; cls = 'bias'; }
+  else if (alpha < -5) { label = 'Defense Mode'; cls = 'bear'; }
+  
+  badge.innerHTML = `<span class="regime-dot ${cls}"></span> ${label}`;
+  badge.className = `regime-badge ${cls}`;
+}
+
+function exportReport() {
+  window.print();
+}
+
+window.exportReport = exportReport;
 
 /* ══════════════════════════════════════════════
    LAYER METRICS
@@ -629,19 +711,29 @@ function renderTrades(d) {
 function renderSectorPie(canvasId, port) {
   const counts = {};
   port.forEach(s => { counts[s.sector] = (counts[s.sector]||0) + 1; });
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const labelCol = isLight ? '#475569' : '#94a3b8';
+  
   const COLORS = ['#22d3ee','#f59e0b','#10b981','#f43f5e','#8b5cf6','#06b6d4','#ec4899','#f97316'];
   mkChart(canvasId, 'doughnut', {
     labels: Object.keys(counts),
-    datasets: [{ data: Object.values(counts), backgroundColor: COLORS, borderWidth: 0, hoverOffset: 6 }]
-  }, { cutout:'68%', plugins:{ legend:{ position:'right', labels:{color:'#94a3b8',boxWidth:8,font:{size:9}} } },
-       scales:{ x:{display:false}, y:{display:false} } });
+    datasets: [{ data: Object.values(counts), backgroundColor: COLORS, borderWidth: 0, hoverOffset: 12 }]
+  }, { 
+    cutout: '72%', 
+    plugins: { 
+      legend: { position: 'right', labels: { color: labelCol, boxWidth: 10, font: { size: 10, weight: '500' } } }
+    }
+  });
 }
 
 /* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  Chart.defaults.color = '#94a3b8';
+  const savedTheme = localStorage.getItem('som-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  
+  Chart.defaults.color = savedTheme === 'light' ? '#475569' : '#94a3b8';
   Chart.defaults.font.family = "'Inter', sans-serif";
 
   const d = DASHBOARD_DATA;

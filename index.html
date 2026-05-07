@@ -39,7 +39,11 @@
         </div>
       </div>
       <div class="header-right">
+        <div id="regime-badge" class="regime-badge"></div>
         <div class="nav-right">
+          <button class="export-btn" onclick="exportReport()">
+            <span>📥</span> Export Report
+          </button>
           <div class="universe-tabs">
             <button class="uni-btn active" id="btn-n50" onclick="switchUniverse('nifty50')">Nifty 50</button>
             <button class="uni-btn" id="btn-n500" onclick="switchUniverse('nifty500')">Nifty 500</button>
@@ -56,9 +60,9 @@
     <nav class="main-nav">
       <button class="nav-btn active" data-tab="overview"   onclick="switchTab('overview')">Overview</button>
       <button class="nav-btn"        data-tab="heatmap"    onclick="switchTab('heatmap')">PnL Heatmaps</button>
-      <button class="nav-btn"        data-tab="equity"     onclick="switchTab('equity')">Equity Curves</button>
+      <button class="nav-btn"        data-tab="performance" onclick="switchTab('performance')">Performance & Risk</button>
       <button class="nav-btn"        data-tab="layers"     onclick="switchTab('layers')">Layer Metrics</button>
-      <button class="nav-btn"        data-tab="churning"   onclick="switchTab('churning')">Churning</button>
+      <button class="nav-btn"        data-tab="churning"   onclick="switchTab('churning')">Churning Analysis</button>
       <button class="nav-btn"        data-tab="portfolio"  onclick="switchTab('portfolio')">Live Portfolio</button>
       <button class="nav-btn"        data-tab="trades"     onclick="switchTab('trades')">Execution Log</button>
     </nav>
