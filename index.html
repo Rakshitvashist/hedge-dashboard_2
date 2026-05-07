@@ -3,157 +3,301 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOM Institutional Terminal | Hedge Portfolio Analytics</title>
+  <title>SOM Institutional Terminal | Sharp Efficient Model</title>
+  <meta name="description" content="Institutional-grade portfolio analytics for the Sharp Efficient Model hedge strategy.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div id="particles-js"></div>
 
-  <main class="app-container">
-    <!-- HEADER -->
-    <header class="header animate-in">
-      <div>
-        <h1 class="brand-title">SOM Institutional Terminal</h1>
-        <p id="last-refresh" class="text-muted mono" style="font-size: 0.75rem; margin-top: 0.5rem;"></p>
+  <!-- HEATMAP CELL POPUP MODAL -->
+  <div id="hmModal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-month" id="modal-month"></span>
+          <span class="modal-sub">Monthly Performance vs Benchmark</span>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
-      <div class="header-actions">
-        <div class="tab-nav">
-          <button class="univ-btn active" id="btn-n50" onclick="switchUniverse('nifty50')">Nifty 50</button>
-          <button class="univ-btn" id="btn-n500" onclick="switchUniverse('nifty500')">Nifty 500</button>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <main class="app-container">
+
+    <!-- HEADER -->
+    <header class="site-header">
+      <div class="header-left">
+        <div class="brand-badge">SOM</div>
+        <div>
+          <h1 class="brand-title">Sharp Efficient Model</h1>
+          <p id="last-refresh" class="brand-sub mono"></p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="univ-switch">
+          <button class="univ-btn active" id="btn-n50" onclick="switchUniverse('nifty50')">
+            <span class="univ-icon">◆</span> Nifty 50
+          </button>
+          <button class="univ-btn" id="btn-n500" onclick="switchUniverse('nifty500')">
+            <span class="univ-icon">◆</span> Nifty 500
+          </button>
         </div>
       </div>
     </header>
 
-    <!-- NAVIGATION -->
-    <nav class="tab-nav animate-in" style="animation-delay: 0.1s">
-      <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
-      <button class="tab-btn" onclick="switchTab('heatmap')">PnL Heatmap</button>
-      <button class="tab-btn" onclick="switchTab('layers')">Layer Metrics</button>
-      <button class="tab-btn" onclick="switchTab('equity')">Equity Growth</button>
-      <button class="tab-btn" onclick="switchTab('churning')">Churning</button>
-      <button class="tab-btn" onclick="switchTab('portfolio')">Live Portfolio</button>
-      <button class="tab-btn" onclick="switchTab('trades')">Execution Log</button>
+    <!-- NAVIGATION TABS -->
+    <nav class="main-nav">
+      <button class="nav-btn active" data-tab="overview"   onclick="switchTab('overview')">Overview</button>
+      <button class="nav-btn"        data-tab="heatmap"    onclick="switchTab('heatmap')">PnL Heatmaps</button>
+      <button class="nav-btn"        data-tab="equity"     onclick="switchTab('equity')">Equity Curves</button>
+      <button class="nav-btn"        data-tab="layers"     onclick="switchTab('layers')">Layer Metrics</button>
+      <button class="nav-btn"        data-tab="churning"   onclick="switchTab('churning')">Churning</button>
+      <button class="nav-btn"        data-tab="portfolio"  onclick="switchTab('portfolio')">Live Portfolio</button>
+      <button class="nav-btn"        data-tab="trades"     onclick="switchTab('trades')">Execution Log</button>
     </nav>
 
-    <!-- TAB: OVERVIEW -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- TAB: OVERVIEW                            -->
+    <!-- ═══════════════════════════════════════ -->
     <section id="tab-overview" class="tab-pane active">
+
+      <!-- KPI Row -->
       <div class="kpi-grid" id="kpi-row"></div>
-      
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
-        <div class="glass" style="padding: 1.5rem;">
-          <h3 class="kpi-label" style="margin-bottom: 1.5rem;">Institutional Equity Curves</h3>
-          <div style="height: 400px;">
+
+      <!-- Charts Row -->
+      <div class="grid-2-1" style="margin-top:1.5rem">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Institutional Equity Curves</h3>
+            <span class="card-sub">All 7 Layers vs Benchmark</span>
+          </div>
+          <div class="chart-area">
             <canvas id="equityOverview"></canvas>
           </div>
         </div>
-        <div class="glass" style="padding: 1.5rem;">
-          <h3 class="kpi-label" style="margin-bottom: 1.5rem;">Market Exposure & Sector Distribution</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div style="height: 350px;"><canvas id="betaChart"></canvas></div>
-            <div style="height: 350px;"><canvas id="overviewSectorPie"></canvas></div>
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Sector Allocation</h3>
+            <span class="card-sub">Current Portfolio</span>
+          </div>
+          <div class="chart-area">
+            <canvas id="overviewSectorPie"></canvas>
           </div>
         </div>
       </div>
+
+      <!-- Beta + Win Rate Row -->
+      <div class="grid-2" style="margin-top:1.5rem">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Rolling Portfolio Beta</h3>
+            <span class="card-sub">Last 12 months</span>
+          </div>
+          <div class="chart-area-sm">
+            <canvas id="betaChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Win Rate by Layer</h3>
+            <span class="card-sub">% Positive Months</span>
+          </div>
+          <div class="chart-area-sm">
+            <canvas id="winRateChart"></canvas>
+          </div>
+        </div>
+      </div>
+
     </section>
 
-    <!-- TAB: HEATMAP -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- TAB: HEATMAPS                           -->
+    <!-- ═══════════════════════════════════════ -->
     <section id="tab-heatmap" class="tab-pane">
-      <div class="glass" style="padding: 2rem;">
-        <h3 class="kpi-label" style="margin-bottom: 2rem;">Monthly Performance Heatmap (ULTRA Defense)</h3>
+      <div class="glass-card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Monthly PnL Heatmaps</h3>
+            <span class="card-sub">Click any cell to compare vs Benchmark</span>
+          </div>
+          <!-- Layer selector -->
+          <div class="layer-tabs" id="heatmap-layer-tabs"></div>
+        </div>
         <div id="heatmap-container"></div>
       </div>
     </section>
 
-    <!-- TAB: LAYERS -->
+    <!-- ═══════════════════════════════════════ -->
+    <!-- TAB: EQUITY                             -->
+    <!-- ═══════════════════════════════════════ -->
+    <section id="tab-equity" class="tab-pane">
+      <div class="glass-card">
+        <div class="card-header">
+          <h3 class="card-title">Full Backtest Equity Curves</h3>
+          <span class="card-sub">Cumulative growth of ₹1 invested</span>
+        </div>
+        <div style="height:500px">
+          <canvas id="equityMain"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- TAB: LAYERS                             -->
+    <!-- ═══════════════════════════════════════ -->
     <section id="tab-layers" class="tab-pane">
-      <div class="glass" style="padding: 1.5rem;">
-        <h3 class="kpi-label" style="margin-bottom: 1.5rem;">Strategy Layer Comparison</h3>
-        <div style="overflow-x: auto;">
+
+      <!-- Radar Chart + Table -->
+      <div class="grid-2-1">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Strategy Layer Comparison</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Layer</th>
+                  <th>CAGR</th><th>Sharpe</th><th>Sortino</th><th>Calmar</th>
+                  <th>Max DD</th><th>Win Rate</th><th>Total Return</th><th>Alpha</th>
+                </tr>
+              </thead>
+              <tbody id="layerTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Risk-Return Radar</h3>
+          </div>
+          <div class="chart-area">
+            <canvas id="radarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Executive Summary Table -->
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header">
+          <h3 class="card-title">Executive Summary — All Metrics</h3>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="execTable"></table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- TAB: CHURNING                           -->
+    <!-- ═══════════════════════════════════════ -->
+    <section id="tab-churning" class="tab-pane">
+      <div class="grid-2" style="margin-bottom:1.5rem">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Stock Additions by Layer</h3>
+          </div>
+          <div class="chart-area">
+            <canvas id="churnAddChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Stock Removals by Layer</h3>
+          </div>
+          <div class="chart-area">
+            <canvas id="churnRemChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="glass-card">
+        <div class="card-header">
+          <h3 class="card-title">Monthly Churning Detail</h3>
+        </div>
+        <div style="overflow-x:auto">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Layer</th>
-                <th>CAGR</th>
-                <th>Sharpe</th>
-                <th>Sortino</th>
-                <th>Max DD</th>
-                <th>Total Return</th>
+                <th>Month</th><th>Count</th>
+                <th class="text-emerald">Base Add</th><th class="text-emerald">ST Add</th><th class="text-emerald">EMA Add</th>
+                <th class="text-rose">Base Rem</th><th class="text-rose">ST Rem</th><th class="text-rose">EMA Rem</th>
               </tr>
             </thead>
-            <tbody id="layerTableBody"></tbody>
+            <tbody id="churningBody"></tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- TAB: CHURNING -->
-    <section id="tab-churning" class="tab-pane">
-      <div class="glass" style="padding: 1.5rem; margin-bottom: 1.5rem;">
-        <h3 class="kpi-label">Strategy Churning Dynamics</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
-          <div style="height: 300px;"><canvas id="churnAddChart"></canvas></div>
-          <div style="height: 300px;"><canvas id="churnRemChart"></canvas></div>
+    <!-- ═══════════════════════════════════════ -->
+    <!-- TAB: PORTFOLIO                          -->
+    <!-- ═══════════════════════════════════════ -->
+    <section id="tab-portfolio" class="tab-pane">
+      <div class="kpi-grid" id="portKpis" style="margin-bottom:1.5rem"></div>
+      <div class="grid-2-1">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Current Holdings</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Symbol</th><th>Sector</th><th>Weight</th>
+                  <th>Beta</th><th>ERB</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="holdingsBody"></tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <div class="glass" style="padding: 1.5rem;">
-        <table class="data-table">
-          <thead>
-            <tr><th>Month</th><th>Count</th><th>Base Add</th><th>ST Add</th><th>EMA Add</th><th>Base Rem</th><th>ST Rem</th></tr>
-          </thead>
-          <tbody id="churningBody"></tbody>
-        </table>
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Sector Breakdown</h3>
+          </div>
+          <div class="chart-area">
+            <canvas id="portSector"></canvas>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- TAB: PORTFOLIO -->
-    <section id="tab-portfolio" class="tab-pane">
-      <div class="kpi-grid" id="portKpis" style="margin-top: 1rem;"></div>
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
-        <div class="glass" style="padding: 1.5rem;">
-          <h3 class="kpi-label">Current Holdings Detail</h3>
+    <!-- ═══════════════════════════════════════ -->
+    <!-- TAB: TRADES                             -->
+    <!-- ═══════════════════════════════════════ -->
+    <section id="tab-trades" class="tab-pane">
+      <div class="glass-card">
+        <div class="card-header">
+          <h3 class="card-title">Execution History</h3>
+          <span class="card-sub">Last 50 transactions</span>
+        </div>
+        <div style="overflow-x:auto">
           <table class="data-table">
             <thead>
-              <tr><th>Symbol</th><th>Sector</th><th>Weight</th><th>LTP</th><th>Today%</th><th>Action</th></tr>
+              <tr>
+                <th>Month</th><th>Symbol</th><th>Sector</th>
+                <th>Action</th><th>Qty</th><th>Price</th><th>Return</th>
+              </tr>
             </thead>
-            <tbody id="holdingsBody"></tbody>
+            <tbody id="tradesBody"></tbody>
           </table>
         </div>
-        <div class="glass" style="padding: 1.5rem;">
-          <h3 class="kpi-label">Sector Allocation</h3>
-          <div style="height: 350px;"><canvas id="portSector"></canvas></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB: TRADES -->
-    <section id="tab-trades" class="tab-pane">
-      <div class="glass" style="padding: 1.5rem;">
-        <h3 class="kpi-label">Recent Execution History</h3>
-        <table class="data-table">
-          <thead>
-            <tr><th>Month</th><th>Symbol</th><th>Action</th><th>Qty</th><th>Price</th><th>Return</th></tr>
-          </thead>
-          <tbody id="tradesBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- TAB: EQUITY -->
-    <section id="tab-equity" class="tab-pane">
-      <div class="glass" style="padding: 1.5rem;">
-        <h3 class="kpi-label">Full Backtest Growth</h3>
-        <div style="height: 500px;"><canvas id="equityMain"></canvas></div>
       </div>
     </section>
 
   </main>
 
-  <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+  <!-- CDN Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.umd.js"></script>
+  <!-- Data must load before app -->
   <script src="data.js"></script>
-  <script type="module" src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

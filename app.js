@@ -1,381 +1,485 @@
-/**
- * SOM Institutional Dashboard - Core Logic
- * Handles state, rendering, and complex visualizations.
- */
+/* SOM Institutional Terminal - app.js */
 
-class Dashboard {
-  constructor() {
-    this.universe = 'nifty50';
-    this.activeTab = 'overview';
-    this.charts = {};
-    
-    this.LAYER_META = {
-      Base:        { label: 'Base SIM',      color: '#94a3b8', cls: 'ltag-base' },
-      ST:          { label: 'ST Filter',     color: '#22d3ee', cls: 'ltag-st' },
-      EMA:         { label: 'EMA Filter',    color: '#10b981', cls: 'ltag-ema' },
-      COMBO:       { label: 'COMBO Filter',  color: '#fbbf24', cls: 'ltag-combo' },
-      ULTRA:       { label: 'ULTRA Layer',   color: '#a855f7', cls: 'ltag-ultra' },
-      COMBO_HEDGE: { label: 'COMBO+Hedge',   color: '#06b6d4', cls: 'ltag-ch' },
-      ULTRA_HEDGE: { label: 'ULTRA Defense', color: '#f43f5e', cls: 'ltag-uh' },
-      Bench:       { label: 'Benchmark',     color: 'rgba(255,255,255,0.2)', cls: '' }
-    };
+const LAYERS = {
+  Base:        { label: 'Base SIM',      color: '#94a3b8', cls: 'ltag-base' },
+  ST:          { label: 'ST Filter',     color: '#22d3ee', cls: 'ltag-st' },
+  EMA:         { label: 'EMA Filter',    color: '#10b981', cls: 'ltag-ema' },
+  COMBO:       { label: 'COMBO Filter',  color: '#f59e0b', cls: 'ltag-combo' },
+  ULTRA:       { label: 'ULTRA Layer',   color: '#8b5cf6', cls: 'ltag-ultra' },
+  COMBO_HEDGE: { label: 'COMBO+Hedge',   color: '#06b6d4', cls: 'ltag-ch' },
+  ULTRA_HEDGE: { label: 'ULTRA Defense', color: '#f43f5e', cls: 'ltag-uh' },
+  Bench:       { label: 'Benchmark',     color: 'rgba(255,255,255,0.3)', cls: 'ltag-bench' }
+};
 
-    this.init();
-  }
+let state = { universe: 'nifty50', tab: 'overview', heatLayer: 'ULTRA_HEDGE' };
+const charts = {};
 
-  init() {
-    this.setupChartDefaults();
-    this.initParticles();
-    this.bindGlobals();
-    this.renderAll();
-  }
-
-  bindGlobals() {
-    window.switchUniverse = (u) => {
-      console.log('Switching Universe:', u);
-      this.universe = u;
-      document.getElementById('btn-n50').classList.toggle('active', u === 'nifty50');
-      document.getElementById('btn-n500').classList.toggle('active', u === 'nifty500');
-      this.renderAll();
-    };
-
-    window.switchTab = (tab) => {
-      console.log('Switching Tab:', tab);
-      this.activeTab = tab;
-      document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === `tab-${tab}`));
-      document.querySelectorAll('.tab-btn').forEach(b => {
-        const onclick = b.getAttribute('onclick') || '';
-        b.classList.toggle('active', onclick.includes(`'${tab}'` || `"${tab}"`));
-      });
-      this.renderTabContent(tab);
-    };
-  }
-
-  setupChartDefaults() {
-    if (typeof Chart === 'undefined') return;
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-    Chart.defaults.plugins.tooltip.borderColor = 'rgba(255, 255, 255, 0.1)';
-    Chart.defaults.plugins.tooltip.borderWidth = 1;
-    Chart.defaults.plugins.tooltip.padding = 12;
-    Chart.defaults.plugins.tooltip.cornerRadius = 8;
-  }
-
-  initParticles() {
-    if (window.particlesJS) {
-      window.particlesJS('particles-js', {
-        particles: {
-          number: { value: 30, density: { enable: true, value_area: 800 } },
-          color: { value: ['#22d3ee', '#fbbf24'] },
-          shape: { type: 'circle' },
-          opacity: { value: 0.1, random: true },
-          size: { value: 1.5, random: true },
-          line_linked: { enable: true, distance: 150, color: '#22d3ee', opacity: 0.05, width: 1 },
-          move: { enable: true, speed: 0.5, direction: 'none', random: true, out_mode: 'out' }
-        },
-        interactivity: { events: { onhover: { enable: true, mode: 'grab' } } },
-        retina_detect: true
-      });
-    }
-  }
-
-  renderAll() {
-    const data = DASHBOARD_DATA[this.universe];
-    if (!data) {
-      console.error('No data found for universe:', this.universe);
-      return;
-    }
-    document.getElementById('last-refresh').textContent = `Terminal Updated: ${DASHBOARD_DATA.last_update || 'N/A'}`;
-    this.renderTabContent(this.activeTab);
-  }
-
-  renderTabContent(tab) {
-    const data = DASHBOARD_DATA[this.universe];
-    if (!data) return;
-
-    if (tab === 'overview')  this.renderOverview(data);
-    if (tab === 'layers')    this.renderLayers(data);
-    if (tab === 'equity')    this.renderEquity(data);
-    if (tab === 'heatmap')   this.renderHeatmap(data);
-    if (tab === 'churning')  this.renderChurning(data);
-    if (tab === 'portfolio') this.renderPortfolio(data);
-    if (tab === 'trades')    this.renderTrades(data);
-  }
-
-  // ── RENDERERS ──────────────────────────────────────────
-
-  renderOverview(data) {
-    const base = data.layer_metrics.Base;
-    const kpis = [
-      { label: 'CAGR (Base)', val: base.CAGR, unit: '%', color: 'cyan' },
-      { label: 'Ex-Ante Sharpe', val: data.avg_ex_ante_sr, unit: '', color: 'gold' },
-      { label: 'Max Drawdown', val: base.Max_DD, unit: '%', color: 'rose' },
-      { label: 'Total Return', val: base.Total_Return, unit: '%', color: 'emerald' }
-    ];
-
-    const row = document.getElementById('kpi-row');
-    if (row) {
-      row.innerHTML = kpis.map((k, i) => `
-        <div class="glass kpi-card animate-in" style="animation-delay: ${i * 0.1}s">
-          <span class="kpi-label">${k.label}</span>
-          <span class="kpi-value text-${k.color}" id="kpi-val-${i}">0</span>
-          <span class="kpi-trend ${k.val >= 0 ? 'pos' : 'neg'}">${k.val >= 0 ? '▲' : '▼'} ${Math.abs(k.val).toFixed(2)}${k.unit}</span>
-        </div>
-      `).join('');
-
-      kpis.forEach((k, i) => {
-        if (window.countUp) {
-          new window.countUp.CountUp(`kpi-val-${i}`, k.val, { decimalPlaces: 2, suffix: k.unit }).start();
-        } else {
-          const el = document.getElementById(`kpi-val-${i}`);
-          if (el) el.textContent = k.val.toFixed(2) + k.unit;
-        }
-      });
-    }
-
-    this.renderEquityOverview(data);
-    this.renderBetaChart(data);
-    this.renderSectorPie('overviewSectorPie', data.current_portfolio || []);
-  }
-
-  renderLayers(data) {
-    const layers = Object.keys(this.LAYER_META).filter(l => l !== 'Bench');
-    const tbody = document.getElementById('layerTableBody');
-    if (!tbody) return;
-    tbody.innerHTML = layers.map(l => {
-      const m = data.layer_metrics[l];
-      return `
-        <tr class="animate-in">
-          <td><span class="ltag ${this.LAYER_META[l].cls}">${this.LAYER_META[l].label}</span></td>
-          <td class="mono ${m.CAGR >= 0 ? 'text-emerald' : 'text-rose'}">${m.CAGR.toFixed(2)}%</td>
-          <td class="mono">${m.Sharpe.toFixed(2)}</td>
-          <td class="mono">${m.Sortino.toFixed(2)}</td>
-          <td class="mono text-rose">${m.Max_DD.toFixed(2)}%</td>
-          <td class="mono text-emerald">${m.Total_Return.toFixed(2)}%</td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  renderHeatmap(data) {
-    const container = document.getElementById('heatmap-container');
-    if (!container) return;
-    const monthlyData = data.monthly_detail;
-    
-    const grid = {};
-    monthlyData.forEach(row => {
-      if (!row.Month) return;
-      const parts = row.Month.split('-');
-      if (parts.length < 2) return;
-      const year = parts[0];
-      const month = parts[1];
-      if (!grid[year]) grid[year] = new Array(12).fill(null);
-      grid[year][parseInt(month) - 1] = row.ULTRA_HEDGE * 100;
-    });
-
-    const years = Object.keys(grid).sort((a, b) => b - a);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    let html = `
-      <div class="heatmap-grid">
-        <div class="hm-head">Year</div>
-        ${months.map(m => `<div class="hm-head">${m}</div>`).join('')}
-    `;
-
-    years.forEach(year => {
-      html += `<div class="hm-year mono">${year}</div>`;
-      grid[year].forEach(val => {
-        const color = this.getHeatmapColor(val);
-        html += `
-          <div class="hm-cell" style="background: ${color}; color: ${Math.abs(val) > 5 ? '#fff' : 'rgba(255,255,255,0.5)'}">
-            ${val !== null ? val.toFixed(1) : ''}
-          </div>`;
-      });
-    });
-
-    html += '</div>';
-    container.innerHTML = html;
-  }
-
-  getHeatmapColor(val) {
-    if (val === null) return 'rgba(255,255,255,0.02)';
-    if (val > 0) {
-      const alpha = Math.min(val / 10, 0.8);
-      return `rgba(16, 185, 129, ${alpha})`;
-    } else {
-      const alpha = Math.min(Math.abs(val) / 10, 0.8);
-      return `rgba(244, 63, 94, ${alpha})`;
-    }
-  }
-
-  renderChurning(d) {
-    const churn = d.churning_data || [];
-    const tbody = document.getElementById('churningBody');
-    if (!tbody) return;
-    tbody.innerHTML = [...churn].reverse().map(r => `
-      <tr>
-        <td>${r.Month}</td>
-        <td class="mono">${r.Stock_Count}</td>
-        <td class="text-emerald">${r['Base Add']}</td><td class="text-emerald">${r['ST Add']}</td><td class="text-emerald">${r['EMA Add']}</td>
-        <td class="text-rose">${r['Base Rem']}</td><td class="text-rose">${r['ST Rem']}</td>
-      </tr>`).join('');
-
-    this.renderLineChart('churnAddChart', churn, ['Base Add','ST Add','EMA Add'], ['#94a3b8','#22d3ee','#10b981']);
-    this.renderLineChart('churnRemChart', churn, ['Base Rem','ST Rem','EMA Rem'], ['#94a3b8','#22d3ee','#10b981']);
-  }
-
-  renderPortfolio(d) {
-    const port = d.current_portfolio || [];
-    const latest = d.monthly_detail[d.monthly_detail.length - 1] || {};
-    const avgChg = port.length ? port.reduce((a, s) => a + (s.change_pct || 0), 0) / port.length : 0;
-
-    const kpiEl = document.getElementById('portKpis');
-    if (kpiEl) {
-      kpiEl.innerHTML = [
-        { label: 'Holdings', val: port.length, unit: '', color: 'cyan' },
-        { label: 'Portfolio Beta', val: latest.Port_Beta || 0, unit: '', color: 'gold' },
-        { label: 'Avg Today %', val: avgChg, unit: '%', color: avgChg >= 0 ? 'emerald' : 'rose' }
-      ].map((k, i) => `
-        <div class="glass kpi-card animate-in">
-          <span class="kpi-label">${k.label}</span>
-          <span class="kpi-value text-${k.color}">${k.val.toFixed(2)}${k.unit}</span>
-        </div>`).join('');
-    }
-
-    const tbody = document.getElementById('holdingsBody');
-    if (tbody) {
-      tbody.innerHTML = port.map(s => `
-        <tr>
-          <td class="mono">${s.clean_symbol}</td>
-          <td class="text-muted" style="font-size:0.7rem">${s.sector}</td>
-          <td class="mono">${((s.weight || 0) * 100).toFixed(1)}%</td>
-          <td class="mono">₹${(s.ltp || 0).toFixed(2)}</td>
-          <td class="mono ${s.change_pct >= 0 ? 'text-emerald' : 'text-rose'}">${(s.change_pct || 0).toFixed(2)}%</td>
-          <td class="mono ${s.action?.includes('BUY') ? 'text-emerald' : 'text-rose'}">${s.action || '—'}</td>
-        </tr>`).join('');
-    }
-
-    this.renderSectorPie('portSector', port);
-  }
-
-  renderTrades(d) {
-    const tbody = document.getElementById('tradesBody');
-    if (!tbody) return;
-    tbody.innerHTML = [...d.exec_history].reverse().slice(0, 50).map(t => `
-      <tr>
-        <td class="text-muted">${t.month}</td>
-        <td class="mono">${t.symbol.split('_')[0]}</td>
-        <td class="${t.action?.includes('BUY') ? 'text-emerald' : 'text-rose'}">${t.action}</td>
-        <td class="mono">${(t.qty || 0).toLocaleString()}</td>
-        <td class="mono">₹${(t.price || 0).toFixed(2)}</td>
-        <td class="mono ${t.return >= 0 ? 'text-emerald' : 'text-rose'}">${(t.return * 100).toFixed(2)}%</td>
-      </tr>`).join('');
-  }
-
-  renderEquity(data) {
-    this.renderLineChart('equityMain', data.equity_curves, Object.keys(this.LAYER_META), Object.values(this.LAYER_META).map(m => m.color), true);
-  }
-
-  // ── CHART HELPERS ──────────────────────────────────────
-
-  renderLineChart(canvasId, data, keys, colors, isEquity = false) {
-    const el = document.getElementById(canvasId);
-    if (!el) return;
-    const ctx = el.getContext('2d');
-    if (this.charts[canvasId]) this.charts[canvasId].destroy();
-
-    const labels = isEquity ? data.months : data.map(r => r.Month);
-    const datasets = keys.map((k, i) => ({
-      label: isEquity ? (this.LAYER_META[k]?.label || k) : k,
-      data: isEquity ? data[k] : data.map(r => r[k]),
-      borderColor: colors[i],
-      borderWidth: 2,
-      pointRadius: isEquity ? 0 : 2,
-      tension: 0.3
-    }));
-
-    this.charts[canvasId] = new Chart(ctx, {
-      type: 'line',
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { grid: { display: false }, ticks: { maxTicksLimit: 12 } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' } }
-        }
-      }
-    });
-  }
-
-  renderSectorPie(canvasId, portfolio) {
-    const el = document.getElementById(canvasId);
-    if (!el) return;
-    const ctx = el.getContext('2d');
-    if (this.charts[canvasId]) this.charts[canvasId].destroy();
-
-    const counts = {};
-    portfolio.forEach(s => { counts[s.sector] = (counts[s.sector] || 0) + 1; });
-    const labels = Object.keys(counts);
-    const vals = Object.values(counts);
-
-    this.charts[canvasId] = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{
-          data: vals,
-          backgroundColor: ['#22d3ee','#fbbf24','#10b981','#f43f5e','#8b5cf6','#06b6d4','#a855f7'],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '70%',
-        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9 } } } }
-      }
-    });
-  }
-
-  renderEquityOverview(data) {
-    this.renderLineChart('equityOverview', data.equity_curves, Object.keys(this.LAYER_META), Object.values(this.LAYER_META).map(m => m.color), true);
-  }
-
-  renderBetaChart(data) {
-    const el = document.getElementById('betaChart');
-    if (!el) return;
-    const ctx = el.getContext('2d');
-    if (this.charts['betaChart']) this.charts['betaChart'].destroy();
-
-    const md = data.monthly_detail.slice(-12);
-    this.charts['betaChart'] = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: md.map(r => r.Month),
-        datasets: [{
-          label: 'Portfolio Beta',
-          data: md.map(r => r.Port_Beta),
-          backgroundColor: 'rgba(34, 211, 238, 0.4)',
-          borderColor: 'var(--cyan)',
-          borderWidth: 1,
-          borderRadius: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { min: 0, max: 2, grid: { color: 'rgba(255,255,255,0.05)' } },
-          x: { grid: { display: false } }
-        }
-      }
-    });
-  }
+/* ── GLOBALS ─────────────────────────────────── */
+function switchUniverse(u) {
+  state.universe = u;
+  document.getElementById('btn-n50').classList.toggle('active', u === 'nifty50');
+  document.getElementById('btn-n500').classList.toggle('active', u === 'nifty500');
+  renderTab(state.tab);
 }
 
-// Initialize on load
-window.addEventListener('DOMContentLoaded', () => {
-  window.app = new Dashboard();
+function switchTab(tab) {
+  state.tab = tab;
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  renderTab(tab);
+}
+
+function closeModal() {
+  document.getElementById('hmModal').classList.remove('open');
+}
+
+window.switchUniverse = switchUniverse;
+window.switchTab = switchTab;
+window.closeModal = closeModal;
+
+/* ── CHART HELPER ────────────────────────────── */
+function mkChart(id, type, data, options) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (charts[id]) { charts[id].destroy(); }
+  const defaults = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', maxTicksLimit: 12 } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b' } }
+    }
+  };
+  charts[id] = new Chart(el.getContext('2d'), { type, data, options: Object.assign({}, defaults, options) });
+}
+
+/* ── DATA ACCESSOR ───────────────────────────── */
+function D() { return DASHBOARD_DATA[state.universe]; }
+
+/* ── RENDER ROUTER ───────────────────────────── */
+function renderTab(tab) {
+  const d = D();
+  if (!d) return;
+  if (tab === 'overview')  renderOverview(d);
+  if (tab === 'heatmap')   renderHeatmaps(d);
+  if (tab === 'equity')    renderEquity(d);
+  if (tab === 'layers')    renderLayers(d);
+  if (tab === 'churning')  renderChurning(d);
+  if (tab === 'portfolio') renderPortfolio(d);
+  if (tab === 'trades')    renderTrades(d);
+}
+
+/* ══════════════════════════════════════════════
+   OVERVIEW
+══════════════════════════════════════════════ */
+function renderOverview(d) {
+  const base = d.layer_metrics.Base;
+  const kpis = [
+    { label: 'CAGR (Base SIM)',    val: base.CAGR,         unit: '%', color: '#22d3ee', accent: '#22d3ee' },
+    { label: 'Ex-Ante Sharpe',     val: d.avg_ex_ante_sr,  unit: '',  color: '#f59e0b', accent: '#f59e0b' },
+    { label: 'Max Drawdown',       val: base.Max_DD,        unit: '%', color: '#f43f5e', accent: '#f43f5e' },
+    { label: 'Total Return',       val: base.Total_Return,  unit: '%', color: '#10b981', accent: '#10b981' },
+    { label: 'Sharpe (Base)',      val: base.Sharpe,        unit: '',  color: '#8b5cf6', accent: '#8b5cf6' },
+    { label: 'Win Rate',           val: base.Win_Rate,      unit: '%', color: '#06b6d4', accent: '#06b6d4' }
+  ];
+
+  const row = document.getElementById('kpi-row');
+  row.innerHTML = kpis.map((k, i) => `
+    <div class="kpi-card" style="--accent:${k.accent}">
+      <span class="kpi-label">${k.label}</span>
+      <span class="kpi-value" style="color:${k.color}" id="ov-kpi-${i}">—</span>
+      <span class="kpi-delta ${k.val >= 0 ? 'pos' : 'neg'}">${k.val >= 0 ? '▲' : '▼'} ${Math.abs(k.val).toFixed(2)}${k.unit}</span>
+    </div>`).join('');
+
+  kpis.forEach((k, i) => {
+    if (window.countUp) {
+      new window.countUp.CountUp('ov-kpi-' + i, k.val, { decimalPlaces: 2, suffix: k.unit, duration: 1.2 }).start();
+    } else {
+      document.getElementById('ov-kpi-' + i).textContent = k.val.toFixed(2) + k.unit;
+    }
+  });
+
+  // Equity chart
+  const ec = d.equity_curves;
+  mkChart('equityOverview', 'line', {
+    labels: ec.months,
+    datasets: Object.keys(LAYERS).map(l => ({
+      label: LAYERS[l].label, data: ec[l],
+      borderColor: LAYERS[l].color, borderWidth: l === 'Bench' ? 1 : 2,
+      borderDash: l === 'Bench' ? [5,4] : [],
+      pointRadius: 0, tension: 0.3, fill: false
+    }))
+  }, { plugins: { legend: { position: 'bottom', labels: { color:'#94a3b8', boxWidth:10, font:{size:10} } } },
+       scales: { x: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b', maxTicksLimit:12} },
+                 y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} } } });
+
+  // Sector pie
+  renderSectorPie('overviewSectorPie', d.current_portfolio || []);
+
+  // Beta bar
+  const md = d.monthly_detail.slice(-12);
+  mkChart('betaChart', 'bar', {
+    labels: md.map(r => r.Month.slice(0, 7)),
+    datasets: [{ label: 'Beta', data: md.map(r => r.Port_Beta),
+      backgroundColor: 'rgba(34,211,238,0.35)', borderColor: '#22d3ee', borderWidth: 1, borderRadius: 4 }]
+  }, { plugins:{legend:{display:false}}, scales:{y:{min:0,max:2,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b'}},
+       x:{grid:{display:false},ticks:{color:'#64748b'}}} });
+
+  // Win rate bar
+  const layers7 = Object.keys(LAYERS).filter(l => l !== 'Bench');
+  mkChart('winRateChart', 'bar', {
+    labels: layers7.map(l => LAYERS[l].label),
+    datasets: [{ label: 'Win Rate %', data: layers7.map(l => d.layer_metrics[l].Win_Rate),
+      backgroundColor: layers7.map(l => LAYERS[l].color + '55'),
+      borderColor: layers7.map(l => LAYERS[l].color), borderWidth: 1, borderRadius: 4 }]
+  }, { indexAxis: 'y', plugins:{legend:{display:false}},
+       scales:{x:{min:0,max:100,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b'}},
+               y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}}} });
+}
+
+/* ══════════════════════════════════════════════
+   HEATMAPS — all 8 layers with layer tabs
+══════════════════════════════════════════════ */
+function renderHeatmaps(d) {
+  // Build layer tabs
+  const tabsEl = document.getElementById('heatmap-layer-tabs');
+  if (!tabsEl.hasChildNodes()) {
+    Object.keys(LAYERS).forEach(l => {
+      const btn = document.createElement('button');
+      btn.className = 'layer-tab-btn' + (l === state.heatLayer ? ' active' : '');
+      btn.textContent = LAYERS[l].label;
+      btn.onclick = () => {
+        state.heatLayer = l;
+        tabsEl.querySelectorAll('.layer-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderHeatmap(d, l);
+      };
+      tabsEl.appendChild(btn);
+    });
+  }
+  renderHeatmap(d, state.heatLayer);
+}
+
+function renderHeatmap(d, layer) {
+  const container = document.getElementById('heatmap-container');
+  const md = d.monthly_detail;
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // Build year/month grid from monthly_detail
+  const grid = {};
+  md.forEach(row => {
+    const m = String(row.Month).slice(0, 7);
+    if (!m || m.length < 7) return;
+    const yr = m.slice(0, 4), mo = parseInt(m.slice(5, 7)) - 1;
+    if (!grid[yr]) grid[yr] = new Array(12).fill(null);
+    const val = row[layer];
+    if (val != null) grid[yr][mo] = +(val * 100).toFixed(2);
+  });
+
+  const years = Object.keys(grid).sort((a, b) => +b - +a);
+
+  let html = '<div class="heatmap-wrap"><div class="heatmap-grid">';
+  html += '<div class="hm-head">Year</div>' + MONTHS.map(m => `<div class="hm-head">${m}</div>`).join('');
+
+  years.forEach(yr => {
+    html += `<div class="hm-year">${yr}</div>`;
+    grid[yr].forEach((val, mi) => {
+      if (val === null) {
+        html += `<div class="hm-cell empty"></div>`;
+      } else {
+        const bg = heatColor(val);
+        const fg = Math.abs(val) > 4 ? '#fff' : 'rgba(255,255,255,0.5)';
+        const monthStr = `${yr}-${String(mi+1).padStart(2,'0')}`;
+        html += `<div class="hm-cell" style="background:${bg};color:${fg}"
+          onclick="openHeatModal('${monthStr}')" title="${monthStr}: ${val}%">
+          ${val > 0 ? '+' : ''}${val}
+        </div>`;
+      }
+    });
+  });
+
+  html += '</div></div>';
+  container.innerHTML = html;
+}
+
+function heatColor(val) {
+  if (val > 0) return `rgba(16,185,129,${Math.min(val/10, 0.85)})`;
+  return `rgba(244,63,94,${Math.min(Math.abs(val)/10, 0.85)})`;
+}
+
+function openHeatModal(monthStr) {
+  const d = D();
+  const row = d.monthly_detail.find(r => String(r.Month).slice(0,7) === monthStr);
+  if (!row) return;
+
+  document.getElementById('modal-month').textContent = monthStr;
+  const benchVal = row.Bench != null ? +(row.Bench * 100).toFixed(2) : null;
+
+  const bodyEl = document.getElementById('modal-body');
+  const layers7 = Object.keys(LAYERS).filter(l => l !== 'Bench');
+
+  bodyEl.innerHTML = `
+    <div class="modal-row" style="background:rgba(34,211,238,0.05);border-radius:.5rem;padding:.75rem">
+      <div>
+        <div class="modal-metric">Benchmark</div>
+        <div class="modal-val" style="color:#94a3b8">${benchVal !== null ? (benchVal >= 0 ? '+' : '') + benchVal + '%' : 'N/A'}</div>
+      </div>
+      <div>
+        <div class="modal-metric">Portfolio Beta</div>
+        <div class="modal-val" style="color:#f59e0b">${row.Port_Beta != null ? row.Port_Beta.toFixed(2) : '—'}</div>
+      </div>
+      <div>
+        <div class="modal-metric">Ex-Ante Sharpe</div>
+        <div class="modal-val" style="color:#22d3ee">${row.Ex_Ante_Sharpe != null ? row.Ex_Ante_Sharpe.toFixed(2) : '—'}</div>
+      </div>
+    </div>
+    <div style="margin-top:1rem">
+      ${layers7.map(l => {
+        const v = row[l] != null ? +(row[l]*100).toFixed(2) : null;
+        const vs = benchVal != null && v != null ? +(v - benchVal).toFixed(2) : null;
+        const col = v !== null ? (v >= 0 ? '#10b981' : '#f43f5e') : '#64748b';
+        const vsCol = vs !== null ? (vs >= 0 ? '#10b981' : '#f43f5e') : '#64748b';
+        return `<div class="modal-row">
+          <div><div class="modal-metric"><span class="ltag ${LAYERS[l].cls}" style="font-size:.6rem">${LAYERS[l].label}</span></div></div>
+          <div>
+            <div class="modal-metric">Return</div>
+            <div class="modal-val" style="color:${col}">${v !== null ? (v>=0?'+':'')+v+'%' : 'N/A'}</div>
+          </div>
+          <div>
+            <div class="modal-metric">vs Benchmark</div>
+            <div class="modal-val" style="color:${vsCol}">${vs !== null ? (vs>=0?'+':'')+vs+'%' : 'N/A'}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  document.getElementById('hmModal').classList.add('open');
+}
+
+window.openHeatModal = openHeatModal;
+
+/* ══════════════════════════════════════════════
+   EQUITY CURVES
+══════════════════════════════════════════════ */
+function renderEquity(d) {
+  const ec = d.equity_curves;
+  mkChart('equityMain', 'line', {
+    labels: ec.months,
+    datasets: Object.keys(LAYERS).map(l => ({
+      label: LAYERS[l].label, data: ec[l],
+      borderColor: LAYERS[l].color, borderWidth: l === 'Bench' ? 1.5 : 2,
+      borderDash: l === 'Bench' ? [6,4] : [],
+      pointRadius: 0, tension: 0.3, fill: false
+    }))
+  }, { plugins: { legend: { position: 'bottom', labels:{color:'#94a3b8',boxWidth:10,font:{size:10}} } },
+       scales: { x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',maxTicksLimit:12}},
+                 y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',
+                   callback: v => '₹' + v.toFixed(2)}} } });
+}
+
+/* ══════════════════════════════════════════════
+   LAYER METRICS
+══════════════════════════════════════════════ */
+function renderLayers(d) {
+  const layers7 = Object.keys(LAYERS).filter(l => l !== 'Bench');
+
+  // Table
+  document.getElementById('layerTableBody').innerHTML = layers7.map(l => {
+    const m = d.layer_metrics[l];
+    return `<tr>
+      <td><span class="ltag ${LAYERS[l].cls}">${LAYERS[l].label}</span></td>
+      <td class="mono ${m.CAGR>=0?'text-emerald':'text-rose'}">${m.CAGR.toFixed(2)}%</td>
+      <td class="mono">${m.Sharpe.toFixed(2)}</td>
+      <td class="mono">${m.Sortino.toFixed(2)}</td>
+      <td class="mono">${m.Calmar.toFixed(2)}</td>
+      <td class="mono text-rose">${m.Max_DD.toFixed(2)}%</td>
+      <td class="mono">${m.Win_Rate.toFixed(1)}%</td>
+      <td class="mono text-emerald">${m.Total_Return.toFixed(2)}%</td>
+      <td class="mono ${m.Alpha>=0?'text-emerald':'text-rose'}">${m.Alpha.toFixed(2)}%</td>
+    </tr>`;
+  }).join('');
+
+  // Radar chart
+  mkChart('radarChart', 'radar', {
+    labels: ['CAGR','Sharpe','Sortino','Win Rate','Alpha'],
+    datasets: layers7.map(l => {
+      const m = d.layer_metrics[l];
+      return {
+        label: LAYERS[l].label,
+        data: [m.CAGR/30*100, m.Sharpe/2*100, m.Sortino/3*100, m.Win_Rate, Math.max(0,m.Alpha/20*100)],
+        borderColor: LAYERS[l].color,
+        backgroundColor: LAYERS[l].color + '18',
+        pointRadius: 3, borderWidth: 2
+      };
+    })
+  }, { scales: { r: { grid:{color:'rgba(255,255,255,0.08)'}, ticks:{display:false},
+                       pointLabels:{color:'#94a3b8',font:{size:10}} } },
+       plugins: { legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:8,font:{size:9}}} } });
+
+  // Executive summary table
+  renderExecTable(d);
+}
+
+function renderExecTable(d) {
+  const el = document.getElementById('execTable');
+  if (!el) return;
+  const summary = d.exec_summary;
+  const layers7 = ['Base','ST','EMA','COMBO','ULTRA','COMBO_HEDGE','ULTRA_HEDGE'];
+  const metrics = Object.keys(summary);
+
+  el.innerHTML = `
+    <thead>
+      <tr>
+        <th>Metric</th>
+        ${layers7.map(l => `<th><span class="ltag ${LAYERS[l].cls}" style="font-size:.6rem">${LAYERS[l].label}</span></th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>
+      ${metrics.map(metric => `
+        <tr>
+          <td class="text-muted" style="font-size:.72rem;font-weight:600">${metric}</td>
+          ${layers7.map(l => {
+            const v = summary[metric]?.[l];
+            if (v == null) return '<td>—</td>';
+            const pct = ['CAGR','XIRR','Volatility','Alpha vs Bench','Max Drawdown',
+                         'VaR 95%','VaR 99%','CVaR 95%','CVaR 99%','Downside Dev',
+                         'Best Month','Worst Month','Avg Gain','Avg Loss',
+                         'Rolling 1Y','Rolling 3Y','Abs Return'].includes(metric);
+            const display = pct ? (v*100).toFixed(2)+'%' : v.toFixed(4);
+            const col = v >= 0 ? 'text-emerald' : 'text-rose';
+            return `<td class="mono ${col}" style="font-size:.75rem">${display}</td>`;
+          }).join('')}
+        </tr>`).join('')}
+    </tbody>`;
+}
+
+/* ══════════════════════════════════════════════
+   CHURNING
+══════════════════════════════════════════════ */
+function renderChurning(d) {
+  const churn = d.churning_data || [];
+  const sorted = [...churn].sort((a,b) => a.Month > b.Month ? 1 : -1);
+
+  document.getElementById('churningBody').innerHTML = [...sorted].reverse().map(r => `
+    <tr>
+      <td class="mono">${r.Month}</td>
+      <td class="mono">${r.Stock_Count ?? '—'}</td>
+      <td class="text-emerald mono">${r['Base Add'] ?? '—'}</td>
+      <td class="text-emerald mono">${r['ST Add'] ?? '—'}</td>
+      <td class="text-emerald mono">${r['EMA Add'] ?? '—'}</td>
+      <td class="text-rose mono">${r['Base Rem'] ?? '—'}</td>
+      <td class="text-rose mono">${r['ST Rem'] ?? '—'}</td>
+      <td class="text-rose mono">${r['EMA Rem'] ?? '—'}</td>
+    </tr>`).join('');
+
+  mkChart('churnAddChart', 'line', {
+    labels: sorted.map(r => r.Month),
+    datasets: ['Base Add','ST Add','EMA Add'].map((k,i) => ({
+      label: k, data: sorted.map(r => r[k] ?? 0),
+      borderColor: ['#94a3b8','#22d3ee','#10b981'][i],
+      borderWidth: 2, pointRadius: 2, tension: 0.3, fill: false
+    }))
+  }, {});
+
+  mkChart('churnRemChart', 'line', {
+    labels: sorted.map(r => r.Month),
+    datasets: ['Base Rem','ST Rem','EMA Rem'].map((k,i) => ({
+      label: k, data: sorted.map(r => r[k] ?? 0),
+      borderColor: ['#94a3b8','#f43f5e','#f59e0b'][i],
+      borderWidth: 2, pointRadius: 2, tension: 0.3, fill: false
+    }))
+  }, {});
+}
+
+/* ══════════════════════════════════════════════
+   PORTFOLIO
+══════════════════════════════════════════════ */
+function renderPortfolio(d) {
+  const port = d.current_portfolio || [];
+  const last = d.monthly_detail[d.monthly_detail.length - 1] || {};
+
+  document.getElementById('portKpis').innerHTML = [
+    { label:'Holdings',      val:port.length,          unit:'',  color:'#22d3ee', accent:'#22d3ee' },
+    { label:'Portfolio Beta',val:+(last.Port_Beta||0).toFixed(2), unit:'', color:'#f59e0b', accent:'#f59e0b' },
+    { label:'Stock Count',   val:+(last.Stock_Count||0), unit:'', color:'#10b981', accent:'#10b981' }
+  ].map(k => `
+    <div class="kpi-card" style="--accent:${k.accent}">
+      <span class="kpi-label">${k.label}</span>
+      <span class="kpi-value" style="color:${k.color}">${typeof k.val==='number'?k.val.toFixed(2):k.val}${k.unit}</span>
+    </div>`).join('');
+
+  document.getElementById('holdingsBody').innerHTML = port.map((s,i) => `
+    <tr>
+      <td class="text-muted mono" style="font-size:.7rem">${i+1}</td>
+      <td class="mono" style="font-weight:700">${s.clean_symbol}</td>
+      <td class="text-muted" style="font-size:.72rem">${s.sector}</td>
+      <td class="mono">${((s.weight||0)*100).toFixed(1)}%</td>
+      <td class="mono">${(s.beta||0).toFixed(3)}</td>
+      <td class="mono">${(s.erb||0).toFixed(4)}</td>
+      <td class="mono ${s.action?.includes('BUY')?'text-emerald':'text-rose'}" style="font-weight:700">${s.action||'HOLD'}</td>
+    </tr>`).join('');
+
+  renderSectorPie('portSector', port);
+}
+
+/* ══════════════════════════════════════════════
+   TRADES
+══════════════════════════════════════════════ */
+function renderTrades(d) {
+  document.getElementById('tradesBody').innerHTML = [...d.exec_history].reverse().slice(0,50).map(t => {
+    const ret = (t.return||0)*100;
+    return `<tr>
+      <td class="mono text-muted">${t.month}</td>
+      <td class="mono" style="font-weight:700">${t.symbol.split('_')[0]}</td>
+      <td class="text-muted" style="font-size:.72rem">${t.sector||'—'}</td>
+      <td class="mono ${(t.action||'').includes('BUY')?'text-emerald':'text-rose'}" style="font-weight:700">${t.action||'—'}</td>
+      <td class="mono">${(t.qty||0).toLocaleString()}</td>
+      <td class="mono">₹${(t.price||0).toFixed(2)}</td>
+      <td class="mono ${ret>=0?'text-emerald':'text-rose'}" style="font-weight:700">${ret>=0?'+':''}${ret.toFixed(2)}%</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+function renderSectorPie(canvasId, port) {
+  const counts = {};
+  port.forEach(s => { counts[s.sector] = (counts[s.sector]||0) + 1; });
+  const COLORS = ['#22d3ee','#f59e0b','#10b981','#f43f5e','#8b5cf6','#06b6d4','#ec4899','#f97316'];
+  mkChart(canvasId, 'doughnut', {
+    labels: Object.keys(counts),
+    datasets: [{ data: Object.values(counts), backgroundColor: COLORS, borderWidth: 0, hoverOffset: 6 }]
+  }, { cutout:'68%', plugins:{ legend:{ position:'right', labels:{color:'#94a3b8',boxWidth:8,font:{size:9}} } },
+       scales:{ x:{display:false}, y:{display:false} } });
+}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  Chart.defaults.color = '#94a3b8';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+
+  const d = DASHBOARD_DATA;
+  document.getElementById('last-refresh').textContent =
+    'Terminal Updated: ' + (d.last_update || 'N/A');
+
+  if (window.particlesJS) {
+    particlesJS('particles-js', {
+      particles: {
+        number:{value:25,density:{enable:true,value_area:900}},
+        color:{value:['#22d3ee','#f59e0b']},
+        shape:{type:'circle'},
+        opacity:{value:0.12,random:true},
+        size:{value:1.5,random:true},
+        line_linked:{enable:true,distance:160,color:'#22d3ee',opacity:0.06,width:1},
+        move:{enable:true,speed:0.4,random:true,out_mode:'out'}
+      },
+      interactivity:{ events:{onhover:{enable:true,mode:'grab'}} },
+      retina_detect:true
+    });
+  }
+
+  renderTab('overview');
 });
