@@ -404,6 +404,7 @@ function renderPerformance(d) {
     renderCorrelation(d);
     renderAttribution(d);
     renderCrisis(d);
+    renderWhatIf(d);
   } catch (e) {
     console.error('[Performance Tab] Error:', e);
   }
@@ -562,6 +563,57 @@ function renderCrisis(d) {
     `).join('')}
   </div>`;
 }
+
+function renderWhatIf(d) {
+  const container = document.getElementById('whatif-container');
+  if (!container) return;
+
+  const last = d.monthly_detail[d.monthly_detail.length - 1] || {};
+  const beta = last.Port_Beta || 1.0;
+
+  container.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:1.5rem">
+      <div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem">
+          <label class="mono" style="font-size:0.8rem; color:var(--muted)">Projected Benchmark Move</label>
+          <span id="whatif-shock-val" class="mono text-cyan" style="font-weight:700">0%</span>
+        </div>
+        <input type="range" id="whatif-slider" min="-30" max="30" value="0" step="1" 
+               style="width:100%; height:6px; border-radius:3px; background:var(--bg-2); cursor:pointer"
+               oninput="updateWhatIf(${beta})">
+      </div>
+      
+      <div class="grid-2">
+        <div class="crisis-card" style="border-left:4px solid var(--rose)">
+          <div class="crisis-name" style="font-size:0.7rem; color:var(--muted)">PROJECTED PORTFOLIO IMPACT</div>
+          <div id="whatif-impact" class="mono" style="font-size:1.5rem; font-weight:700; margin:0.5rem 0">0.00%</div>
+          <div style="font-size:0.75rem; color:var(--slate)">Based on current Portfolio Beta: <b>${beta.toFixed(2)}</b></div>
+        </div>
+        <div class="crisis-card" style="border-left:4px solid var(--emerald)">
+          <div class="crisis-name" style="font-size:0.7rem; color:var(--muted)">HEDGE PROTECTION ESTIMATE</div>
+          <div id="whatif-hedge" class="mono text-emerald" style="font-size:1.5rem; font-weight:700; margin:0.5rem 0">0.00%</div>
+          <div style="font-size:0.75rem; color:var(--slate)">Expected reduction in loss via COMBO/ULTRA defense</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function updateWhatIf(beta) {
+  const shock = parseInt(document.getElementById('whatif-slider').value);
+  document.getElementById('whatif-shock-val').textContent = (shock > 0 ? '+' : '') + shock + '%';
+  
+  const impact = shock * beta;
+  const impactEl = document.getElementById('whatif-impact');
+  impactEl.textContent = (impact > 0 ? '+' : '') + impact.toFixed(2) + '%';
+  impactEl.className = 'mono ' + (impact >= 0 ? 'text-emerald' : 'text-rose');
+  
+  // Simplified hedge logic: Hedges reduce loss by ~40% in large drops
+  const hedge = shock < 0 ? Math.abs(impact * 0.4) : 0;
+  document.getElementById('whatif-hedge').textContent = (hedge > 0 ? '+' : '') + hedge.toFixed(2) + '%';
+}
+
+window.updateWhatIf = updateWhatIf;
 
 function renderRegimeBadge(d) {
   const badge = document.getElementById('regime-badge');
