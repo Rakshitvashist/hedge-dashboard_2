@@ -52,6 +52,40 @@ body {
   overflow-x: hidden;
 }
 
+/* Subtle CRT scanline overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.03) 2px,
+    rgba(0,0,0,.03) 4px
+  );
+}
+
+/* ── KEYFRAMES ────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(34,211,238,.2); }
+  50%       { box-shadow: 0 0 18px rgba(34,211,238,.5), 0 0 40px rgba(34,211,238,.15); }
+}
+
+@keyframes borderSpin {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── PARTICLES ────────────────────────────────────────── */
 #particles-js {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -239,52 +273,63 @@ body {
 /* ── KPI GRID ──────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
 }
 
 .kpi-card {
-  background: var(--bg-2);
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(15,25,50,.9), rgba(10,20,40,.7));
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.07);
+  border-bottom: 2px solid var(--accent, var(--cyan));
   border-radius: var(--radius);
-  padding: 1.5rem;
-  display: flex; flex-direction: column; gap: .4rem;
+  padding: 1.4rem 1.5rem;
+  display: flex; flex-direction: column; gap: .35rem;
   transition: var(--trans);
   position: relative; overflow: hidden;
+  animation: fadeInUp .5s ease-out both;
 }
 
-.kpi-card::after {
+.kpi-card::before {
   content: '';
   position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--accent, var(--cyan));
-  opacity: .6;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at center, var(--accent, rgba(34,211,238,.06)) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .4s;
+  pointer-events: none;
 }
 
-.kpi-card:hover { transform: translateY(-3px); border-color: var(--border-a); }
+.kpi-card:hover::before { opacity: 1; }
+.kpi-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent, var(--cyan));
+  box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 20px rgba(34,211,238,.08);
+}
 
 .kpi-label {
-  font-size: .68rem;
+  font-size: .65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .12em;
+  letter-spacing: .14em;
   color: var(--slate);
 }
 
 .kpi-value {
   font-family: var(--mono);
-  font-size: 2rem;
+  font-size: 1.9rem;
   font-weight: 700;
   line-height: 1;
+  animation: countUp .6s ease-out both;
   color: var(--cyan);
 }
 
 .kpi-delta {
   font-family: var(--mono);
-  font-size: .75rem;
+  font-size: .72rem;
   font-weight: 600;
+  display: flex; align-items: center; gap: .2rem;
 }
 .kpi-delta.pos { color: var(--emerald); }
 .kpi-delta.neg { color: var(--rose); }
@@ -296,24 +341,40 @@ body {
 }
 
 .data-table th {
-  padding: .6rem 1rem;
+  padding: .65rem 1rem;
   text-align: left;
-  font-size: .65rem;
+  font-size: .62rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .08em;
+  letter-spacing: .1em;
   color: var(--slate);
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky; top: 0;
+  background: rgba(10,22,42,.95);
+  backdrop-filter: blur(8px);
+  z-index: 1;
 }
 
 .data-table td {
-  padding: .7rem 1rem;
+  padding: .65rem 1rem;
   font-size: .8rem;
-  border-bottom: 1px solid rgba(255,255,255,.03);
+  border-bottom: 1px solid rgba(255,255,255,.025);
   transition: background .15s;
+  white-space: nowrap;
 }
 
-.data-table tr:hover td { background: rgba(34,211,238,.03); }
+.data-table tbody tr {
+  transition: all .15s;
+}
+
+.data-table tbody tr:hover td {
+  background: rgba(34,211,238,.04);
+}
+
+.data-table tbody tr:hover td:first-child {
+  border-left: 2px solid var(--cyan);
+}
 
 /* ── LAYER TAGS ────────────────────────────────────────── */
 .ltag {

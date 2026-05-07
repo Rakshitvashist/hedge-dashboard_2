@@ -75,12 +75,14 @@ function renderTab(tab) {
 function renderOverview(d) {
   const base = d.layer_metrics.Base;
   const kpis = [
-    { label: 'CAGR (Base SIM)',    val: base.CAGR,         unit: '%', color: '#22d3ee', accent: '#22d3ee' },
-    { label: 'Ex-Ante Sharpe',     val: d.avg_ex_ante_sr,  unit: '',  color: '#f59e0b', accent: '#f59e0b' },
-    { label: 'Max Drawdown',       val: base.Max_DD,        unit: '%', color: '#f43f5e', accent: '#f43f5e' },
-    { label: 'Total Return',       val: base.Total_Return,  unit: '%', color: '#10b981', accent: '#10b981' },
-    { label: 'Sharpe (Base)',      val: base.Sharpe,        unit: '',  color: '#8b5cf6', accent: '#8b5cf6' },
-    { label: 'Win Rate',           val: base.Win_Rate,      unit: '%', color: '#06b6d4', accent: '#06b6d4' }
+    { label: 'CAGR (Base SIM)',  val: base.CAGR,          unit: '%', color: '#22d3ee', accent: '#22d3ee' },
+    { label: 'Ex-Ante Sharpe',   val: d.avg_ex_ante_sr,   unit: '',  color: '#f59e0b', accent: '#f59e0b' },
+    { label: 'Max Drawdown',     val: base.Max_DD,         unit: '%', color: '#f43f5e', accent: '#f43f5e' },
+    { label: 'Total Return',     val: base.Total_Return,   unit: '%', color: '#10b981', accent: '#10b981' },
+    { label: 'Avg Gain (M)',     val: base.Avg_Gain,       unit: '%', color: '#8b5cf6', accent: '#8b5cf6' },
+    { label: 'Avg Loss (M)',     val: base.Avg_Loss,       unit: '%', color: '#f97316', accent: '#f97316' },
+    { label: 'Win Rate',         val: base.Win_Rate,       unit: '%', color: '#06b6d4', accent: '#06b6d4' },
+    { label: 'Alpha vs Bench',   val: base.Alpha,          unit: '%', color: '#a78bfa', accent: '#a78bfa' }
   ];
 
   const row = document.getElementById('kpi-row');
@@ -284,17 +286,21 @@ function renderLayers(d) {
   const layers7 = Object.keys(LAYERS).filter(l => l !== 'Bench');
 
   // Table
+  // Ex-Ante Sharpe from exec_summary
+  const exAnte = d.exec_summary?.['Avg Ex-Ante Sharpe'] || {};
   document.getElementById('layerTableBody').innerHTML = layers7.map(l => {
     const m = d.layer_metrics[l];
+    const ea = exAnte[l] != null ? exAnte[l].toFixed(2) : '—';
     return `<tr>
       <td><span class="ltag ${LAYERS[l].cls}">${LAYERS[l].label}</span></td>
-      <td class="mono ${m.CAGR>=0?'text-emerald':'text-rose'}">${m.CAGR.toFixed(2)}%</td>
-      <td class="mono">${m.Sharpe.toFixed(2)}</td>
-      <td class="mono">${m.Sortino.toFixed(2)}</td>
+      <td class="mono ${m.CAGR>=0?'text-emerald':'text-rose'}" style="font-weight:700">${m.CAGR.toFixed(2)}%</td>
+      <td class="mono">${ea}</td>
       <td class="mono">${m.Calmar.toFixed(2)}</td>
-      <td class="mono text-rose">${m.Max_DD.toFixed(2)}%</td>
+      <td class="mono text-rose" style="font-weight:700">${m.Max_DD.toFixed(2)}%</td>
       <td class="mono">${m.Win_Rate.toFixed(1)}%</td>
-      <td class="mono text-emerald">${m.Total_Return.toFixed(2)}%</td>
+      <td class="mono text-emerald">${m.Avg_Gain.toFixed(2)}%</td>
+      <td class="mono text-rose">${m.Avg_Loss.toFixed(2)}%</td>
+      <td class="mono text-emerald" style="font-weight:700">${m.Total_Return.toFixed(2)}%</td>
       <td class="mono ${m.Alpha>=0?'text-emerald':'text-rose'}">${m.Alpha.toFixed(2)}%</td>
     </tr>`;
   }).join('');
@@ -408,18 +414,26 @@ function renderPortfolio(d) {
       <span class="kpi-value" style="color:${k.color}">${typeof k.val==='number'?k.val.toFixed(2):k.val}${k.unit}</span>
     </div>`).join('');
 
-  document.getElementById('holdingsBody').innerHTML = port.map((s,i) => `
-    <tr>
+  const cleanPort = port.filter(s => s.clean_symbol && s.clean_symbol !== 'Stock');
+
+  document.getElementById('holdingsBody').innerHTML = cleanPort.map((s,i) => {
+    const ltp = s.ltp || 0;
+    const chg = s.change_pct || 0;
+    const chgCol = chg >= 0 ? 'text-emerald' : 'text-rose';
+    const chgSign = chg >= 0 ? '+' : '';
+    const actionCol = (s.action||'').includes('BUY') ? 'text-emerald' : (s.action||'').includes('SELL') ? 'text-rose' : 'text-muted';
+    return `<tr>
       <td class="text-muted mono" style="font-size:.7rem">${i+1}</td>
       <td class="mono" style="font-weight:700">${s.clean_symbol}</td>
       <td class="text-muted" style="font-size:.72rem">${s.sector}</td>
-      <td class="mono">${((s.weight||0)*100).toFixed(1)}%</td>
-      <td class="mono">${(s.beta||0).toFixed(3)}</td>
-      <td class="mono">${(s.erb||0).toFixed(4)}</td>
-      <td class="mono ${s.action?.includes('BUY')?'text-emerald':'text-rose'}" style="font-weight:700">${s.action||'HOLD'}</td>
-    </tr>`).join('');
+      <td class="mono">${ltp > 0 ? '₹'+ltp.toFixed(2) : '—'}</td>
+      <td class="mono ${chgCol}" style="font-weight:700">${ltp > 0 ? chgSign+chg.toFixed(2)+'%' : '—'}</td>
+      <td class="mono ${actionCol}" style="font-weight:700">${s.action || 'HOLD'}</td>
+      <td class="mono text-muted" style="font-size:.7rem">${s.date || '—'}</td>
+    </tr>`;
+  }).join('');
 
-  renderSectorPie('portSector', port);
+  renderSectorPie('portSector', cleanPort);
 }
 
 /* ══════════════════════════════════════════════
