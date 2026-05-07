@@ -564,53 +564,107 @@ function renderCrisis(d) {
   </div>`;
 }
 
+function updateWhatIf(shock) {
+  const d = D();
+  const md = d.monthly_detail;
+  const layers = Object.keys(LAYERS).filter(l => l !== 'Bench');
+  
+  document.getElementById('whatif-shock-val').textContent = (shock > 0 ? '+' : '') + shock + '%';
+  
+  const resultsEl = document.getElementById('whatif-results');
+  if (!resultsEl) return;
+
+  const benchRets = md.map(r => r.Bench || 0);
+  
+  const breakdown = layers.map(l => {
+    const layerRets = md.map(r => r[l] || 0);
+    const beta = calculateBeta(layerRets, benchRets);
+    const impact = shock * beta;
+    return {
+      id: l,
+      label: LAYERS[l].label,
+      beta: beta,
+      impact: impact,
+      vsBench: impact - shock
+    };
+  });
+
+  resultsEl.innerHTML = `
+    <table class="data-table" style="margin-top:1rem; font-size:0.75rem">
+      <thead>
+        <tr>
+          <th>Strategy Layer</th>
+          <th>Est. Beta</th>
+          <th>Proj. Impact</th>
+          <th>Alpha vs Bench</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${breakdown.map(b => `
+          <tr>
+            <td><span class="ltag ${LAYERS[b.id].cls}" style="font-size:0.6rem">${b.label}</span></td>
+            <td class="mono">${b.beta.toFixed(2)}</td>
+            <td class="mono ${b.impact >= 0 ? 'text-emerald' : 'text-rose'}" style="font-weight:700">${(b.impact >= 0 ? '+' : '') + b.impact.toFixed(2)}%</td>
+            <td class="mono ${b.vsBench >= 0 ? 'text-emerald' : 'text-rose'}">${(b.vsBench >= 0 ? '+' : '') + b.vsBench.toFixed(2)}%</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+
+  // Update main summary cards
+  const portBeta = breakdown.find(b => b.id === 'Base')?.beta || 1.0;
+  const portImpact = shock * portBeta;
+  const impactEl = document.getElementById('whatif-impact');
+  impactEl.textContent = (portImpact >= 0 ? '+' : '') + portImpact.toFixed(2) + '%';
+  impactEl.className = 'mono ' + (portImpact >= 0 ? 'text-emerald' : 'text-rose');
+
+  const hedgeProt = shock < 0 ? Math.abs((shock * 1.0) - (shock * 0.6)) : 0; // Simulated hedge efficacy
+  document.getElementById('whatif-hedge').textContent = (hedgeProt > 0 ? '+' : '') + hedgeProt.toFixed(2) + '%';
+}
+
+function calculateBeta(layer, bench) {
+  const n = layer.length;
+  if (n < 2) return 1.0;
+  const muB = bench.reduce((a,b)=>a+b,0)/n;
+  const varB = bench.reduce((a,b)=>a+Math.pow(b-muB,2),0)/n;
+  const covLB = layer.reduce((acc,li,i) => acc + (li-(layer.reduce((a,b)=>a+b,0)/n))*(bench[i]-muB), 0)/n;
+  return varB === 0 ? 0 : covLB / varB;
+}
+
 function renderWhatIf(d) {
   const container = document.getElementById('whatif-container');
   if (!container) return;
-
-  const last = d.monthly_detail[d.monthly_detail.length - 1] || {};
-  const beta = last.Port_Beta || 1.0;
 
   container.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:1.5rem">
       <div>
         <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem">
-          <label class="mono" style="font-size:0.8rem; color:var(--muted)">Projected Benchmark Move</label>
+          <label class="mono" style="font-size:0.8rem; color:var(--muted)">Benchmark Shock Simulator</label>
           <span id="whatif-shock-val" class="mono text-cyan" style="font-weight:700">0%</span>
         </div>
-        <input type="range" id="whatif-slider" min="-30" max="30" value="0" step="1" 
-               style="width:100%; height:6px; border-radius:3px; background:var(--bg-2); cursor:pointer"
-               oninput="updateWhatIf(${beta})">
+        <input type="range" id="whatif-slider" min="-50" max="50" value="0" step="1" 
+               style="width:100%; height:8px; border-radius:4px; background:var(--bg-2); cursor:pointer"
+               oninput="updateWhatIf(this.value)">
       </div>
       
       <div class="grid-2">
         <div class="crisis-card" style="border-left:4px solid var(--rose)">
-          <div class="crisis-name" style="font-size:0.7rem; color:var(--muted)">PROJECTED PORTFOLIO IMPACT</div>
+          <div class="crisis-name" style="font-size:0.7rem; color:var(--muted)">CORE MODEL IMPACT</div>
           <div id="whatif-impact" class="mono" style="font-size:1.5rem; font-weight:700; margin:0.5rem 0">0.00%</div>
-          <div style="font-size:0.75rem; color:var(--slate)">Based on current Portfolio Beta: <b>${beta.toFixed(2)}</b></div>
+          <div style="font-size:0.75rem; color:var(--slate)">Projected move for Base SIM layer</div>
         </div>
         <div class="crisis-card" style="border-left:4px solid var(--emerald)">
           <div class="crisis-name" style="font-size:0.7rem; color:var(--muted)">HEDGE PROTECTION ESTIMATE</div>
           <div id="whatif-hedge" class="mono text-emerald" style="font-size:1.5rem; font-weight:700; margin:0.5rem 0">0.00%</div>
-          <div style="font-size:0.75rem; color:var(--slate)">Expected reduction in loss via COMBO/ULTRA defense</div>
+          <div style="font-size:0.75rem; color:var(--slate)">Estimated loss prevention via Defense layers</div>
         </div>
       </div>
+
+      <div id="whatif-results"></div>
     </div>
   `;
-}
-
-function updateWhatIf(beta) {
-  const shock = parseInt(document.getElementById('whatif-slider').value);
-  document.getElementById('whatif-shock-val').textContent = (shock > 0 ? '+' : '') + shock + '%';
-  
-  const impact = shock * beta;
-  const impactEl = document.getElementById('whatif-impact');
-  impactEl.textContent = (impact > 0 ? '+' : '') + impact.toFixed(2) + '%';
-  impactEl.className = 'mono ' + (impact >= 0 ? 'text-emerald' : 'text-rose');
-  
-  // Simplified hedge logic: Hedges reduce loss by ~40% in large drops
-  const hedge = shock < 0 ? Math.abs(impact * 0.4) : 0;
-  document.getElementById('whatif-hedge').textContent = (hedge > 0 ? '+' : '') + hedge.toFixed(2) + '%';
+  updateWhatIf(0);
 }
 
 window.updateWhatIf = updateWhatIf;
@@ -774,20 +828,21 @@ function renderChurning(d) {
       <td class="text-rose mono">${r['EMA Rem'] ?? '—'}</td>
     </tr>`).join('');
 
+  const churnKeys = ['Base','ST','EMA','COMBO','ULTRA'];
   mkChart('churnAddChart', 'line', {
     labels: sorted.map(r => r.Month),
-    datasets: ['Base Add','ST Add','EMA Add'].map((k,i) => ({
-      label: k, data: sorted.map(r => r[k] ?? 0),
-      borderColor: ['#94a3b8','#22d3ee','#10b981'][i],
+    datasets: churnKeys.map((k,i) => ({
+      label: k + ' Add', data: sorted.map(r => r[k + ' Add'] ?? 0),
+      borderColor: LAYERS[k].color,
       borderWidth: 2, pointRadius: 2, tension: 0.3, fill: false
     }))
   }, {});
 
   mkChart('churnRemChart', 'line', {
     labels: sorted.map(r => r.Month),
-    datasets: ['Base Rem','ST Rem','EMA Rem'].map((k,i) => ({
-      label: k, data: sorted.map(r => r[k] ?? 0),
-      borderColor: ['#94a3b8','#f43f5e','#f59e0b'][i],
+    datasets: churnKeys.map((k,i) => ({
+      label: k + ' Rem', data: sorted.map(r => r[k + ' Rem'] ?? 0),
+      borderColor: LAYERS[k].color,
       borderWidth: 2, pointRadius: 2, tension: 0.3, fill: false
     }))
   }, {});
