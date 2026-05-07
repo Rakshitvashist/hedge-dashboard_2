@@ -546,22 +546,46 @@ function renderAttribution(d) {
 
 function renderCrisis(d) {
   const events = [
-    { name: 'Covid-19 Crash', date: '2020-03', recovery: '3 Months' },
-    { name: 'Tech Sell-off', date: '2022-01', recovery: '5 Months' },
-    { name: 'Adani Crisis',  date: '2023-01', recovery: '2 Months' }
+    { name: 'Covid-19 Crash', date: '2020-03' },
+    { name: 'Tech Sell-off', date: '2022-01' },
+    { name: 'Adani Crisis',  date: '2023-01' }
   ];
   const container = document.getElementById('crisis-container');
   if (!container) return;
 
-  container.innerHTML = `<div class="crisis-grid">
-    ${events.map(e => `
-      <div class="crisis-card">
-        <div class="crisis-name">${e.name}</div>
-        <div class="crisis-meta">Triggered: ${e.date} | Recov: ${e.recovery}</div>
-        <div class="crisis-stat">Model Protected: <span class="text-emerald">YES</span></div>
-      </div>
-    `).join('')}
-  </div>`;
+  const md = d.monthly_detail;
+  const layers = Object.keys(LAYERS); // All 8 including Bench
+
+  container.innerHTML = `
+    <div class="crisis-grid">
+      ${events.map(e => {
+        const row = md.find(r => r.Month.startsWith(e.date));
+        if (!row) return `<div class="crisis-card">Data missing for ${e.name}</div>`;
+        
+        return `
+          <div class="crisis-card">
+            <div class="crisis-name">${e.name} (${e.date})</div>
+            <div class="crisis-meta">Real-world performance of all layers:</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.5rem">
+              ${layers.map(l => {
+                const val = (row[l] || 0) * 100;
+                return `
+                  <div class="mono" style="font-size:0.65rem; display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <span style="color:var(--slate)">${l}</span>
+                    <span class="${val >= 0 ? 'text-emerald' : 'text-rose'}">${val >= 0 ? '+' : ''}${val.toFixed(1)}%</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <div class="crisis-stat" style="margin-top:1rem; border-top:1px solid var(--border); padding-top:0.5rem">
+              Benchmark: <span class="text-rose">${((row.Bench || 0)*100).toFixed(1)}%</span> | 
+              Model Alpha: <span class="text-emerald">+${(((row.Base || 0) - (row.Bench || 0))*100).toFixed(1)}%</span>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
 function updateWhatIf(shock) {
