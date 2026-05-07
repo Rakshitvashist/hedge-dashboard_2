@@ -546,9 +546,9 @@ function renderAttribution(d) {
 
 function renderCrisis(d) {
   const events = [
-    { name: 'Covid-19 Crash', date: '2020-03' },
     { name: 'Tech Sell-off', date: '2022-01' },
-    { name: 'Adani Crisis',  date: '2023-01' }
+    { name: 'Adani Crisis',  date: '2023-01' },
+    { name: 'General Election', date: '2024-06' }
   ];
   const container = document.getElementById('crisis-container');
   if (!container) return;
@@ -556,9 +556,17 @@ function renderCrisis(d) {
   const md = d.monthly_detail;
   const layers = Object.keys(LAYERS).filter(l => l !== 'Bench');
 
+  // Only show events that have data in the monthly detail
+  const activeEvents = events.filter(e => md.some(r => r.Month.startsWith(e.date)));
+
+  if (activeEvents.length === 0) {
+    container.innerHTML = `<div class="crisis-card" style="text-align:center; color:var(--slate)">No historical crisis events found in the current backtest window.</div>`;
+    return;
+  }
+
   container.innerHTML = `
     <div class="crisis-grid">
-      ${events.map(e => {
+      ${activeEvents.map(e => {
         const row = md.find(r => r.Month.startsWith(e.date));
         if (!row) return `<div class="crisis-card">Data missing for ${e.name}</div>`;
         
