@@ -78,17 +78,68 @@ function mkChart(id, defaultType, data, options) {
 
   const defaults = {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } } },
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+    plugins: { 
+      legend: { labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } },
+      tooltip: {
+        backgroundColor: 'rgba(10, 22, 42, 0.95)',
+        titleColor: '#22d3ee',
+        bodyColor: '#e2e8f0',
+        borderColor: 'rgba(34, 211, 238, 0.2)',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: true,
+        bodyFont: { family: "'Roboto Mono', monospace", size: 12 },
+        titleFont: { family: "'Inter', sans-serif", weight: 'bold', size: 14 },
+        callbacks: {
+          label: (context) => {
+            let label = context.dataset.label || '';
+            if (label) label += ': ';
+            if (context.parsed.y !== null) {
+              label += context.parsed.y.toFixed(2);
+              if (id.includes('winRate') || id.includes('equity')) label += '%';
+            }
+            return label;
+          }
+        }
+      }
+    },
     scales: {
       x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', maxTicksLimit: 12 } },
       y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b' } }
     }
   };
 
+  // Custom Plugin for Vertical Crosshair Line
+  const verticalLinePlugin = {
+    id: 'verticalLine',
+    afterDraw: (chart) => {
+      if (chart.tooltip?._active?.length) {
+        const x = chart.tooltip._active[0].element.x;
+        const yAxis = chart.scales.y;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(x, yAxis.top);
+        ctx.lineTo(x, yAxis.bottom);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(34, 211, 238, 0.3)';
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  };
+
   charts[id] = new Chart(el.getContext('2d'), { 
     type: type === 'dot' ? 'line' : type, 
     data, 
-    options: Object.assign({}, defaults, options) 
+    options: Object.assign({}, defaults, options),
+    plugins: [verticalLinePlugin]
   });
 
   renderChartControls(id);
