@@ -427,11 +427,19 @@ function renderChurning(d) {
   const rawChurn = d.churning_data || [];
   // Strict filter: Month must be a string like "2021-04" (YYYY-MM)
   const monthRegex = /^\d{4}-\d{2}$/;
+  const blacklist = ['ULTRA', 'COMBO', 'EMA', 'ST', 'BASE', 'SUMMARY', 'AVG', 'LAYER', 'STOCK'];
+  
   const churn = rawChurn.filter(r => {
-    const m = String(r.Month || '').trim();
-    return monthRegex.test(m);
+    const m = String(r.Month || '').trim().toUpperCase();
+    if (!m || m === '0.0' || m === '0') return false;
+    // If it contains any blacklist word, reject it
+    if (blacklist.some(word => m.includes(word))) return false;
+    // Must also match the date pattern
+    return monthRegex.test(String(r.Month).trim());
   });
+  
   console.log(`[Churning] Filtered ${rawChurn.length} down to ${churn.length} valid months.`);
+  console.table(churn.slice(0, 5)); // Log first 5 rows to console for verification
   
   const sorted = [...churn].sort((a,b) => a.Month > b.Month ? 1 : -1);
 
