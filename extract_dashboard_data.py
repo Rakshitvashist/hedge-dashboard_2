@@ -209,6 +209,21 @@ def get_sector_map():
                 mapping[str(row[sym_col]).strip()] = str(row[ind_col]).strip()
     return mapping
 
+def get_exec_history(xl):
+    try:
+        df = pd.read_excel(xl, sheet_name='Execution_History')
+        df = df.fillna('')
+        records = []
+        for _, row in df.iterrows():
+            records.append({
+                'month': str(row.get('Month','')),
+                'symbol': str(row.get('Symbol','')),
+                'action': str(row.get('Action','')),
+                'qty': int(row.get('Qty', 0)) if row.get('Qty','') != '' else 0,
+                'price': safe_float(row.get('Price', 0)),
+                'return': safe_float(row.get('Return', 0))
+            })
+        return records[-30:]  # last 30 trades
     except:
         return []
 
