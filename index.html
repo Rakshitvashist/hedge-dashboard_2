@@ -150,18 +150,60 @@
     <!-- ═══════════════════════════════════════ -->
     <!-- TAB: EQUITY                             -->
     <!-- ═══════════════════════════════════════ -->
-    <section id="tab-equity" class="tab-pane">
-      <div class="glass-card">
+    <!-- TAB: PERFORMANCE & RISK -->
+    <section id="tab-performance" class="tab-pane">
+      <div class="glass-card" style="margin-bottom:1.5rem">
         <div class="card-header">
           <div>
-            <h3 class="card-title">Full Backtest Equity Curves</h3>
-            <span class="card-sub">Cumulative growth of ₹1 invested</span>
+            <h3 class="card-title">Institutional Equity Curves</h3>
+            <span class="card-sub">Cumulative growth across all 7 layers</span>
           </div>
           <div class="chart-controls" data-for="equityMain"></div>
         </div>
-        <div style="height:500px">
+        <div class="chart-area" style="height:450px">
           <canvas id="equityMain"></canvas>
         </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Underwater Curve (Drawdown)</h3>
+          </div>
+          <div class="chart-area-sm">
+            <canvas id="drawdownChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Rolling Sharpe Ratio (12M)</h3>
+          </div>
+          <div class="chart-area-sm">
+            <canvas id="rollingSharpeChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:1.5rem">
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">PnL Attribution (Top Performers)</h3>
+          </div>
+          <div id="attribution-container" style="padding:1rem"></div>
+        </div>
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Strategy Correlation Matrix</h3>
+          </div>
+          <div id="correlation-container" style="padding:1rem"></div>
+        </div>
+      </div>
+
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header">
+          <h3 class="card-title">Crisis Test History (Stress Analysis)</h3>
+        </div>
+        <div id="crisis-container" style="padding:1rem"></div>
       </div>
     </section>
 
