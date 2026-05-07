@@ -363,7 +363,9 @@ function renderExecTable(d) {
    CHURNING
 ══════════════════════════════════════════════ */
 function renderChurning(d) {
-  const churn = d.churning_data || [];
+  const rawChurn = d.churning_data || [];
+  // Filter out invalid months (0.0 or empty)
+  const churn = rawChurn.filter(r => r.Month && typeof r.Month === 'string' && r.Month.length > 4);
   const sorted = [...churn].sort((a,b) => a.Month > b.Month ? 1 : -1);
 
   document.getElementById('churningBody').innerHTML = [...sorted].reverse().map(r => `
