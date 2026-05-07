@@ -31,6 +31,9 @@
       <button class="tab-btn" onclick="switchTab('heatmap')">PnL Heatmap</button>
       <button class="tab-btn" onclick="switchTab('layers')">Layer Metrics</button>
       <button class="tab-btn" onclick="switchTab('equity')">Equity Growth</button>
+      <button class="tab-btn" onclick="switchTab('churning')">Churning</button>
+      <button class="tab-btn" onclick="switchTab('portfolio')">Live Portfolio</button>
+      <button class="tab-btn" onclick="switchTab('trades')">Execution Log</button>
     </nav>
 
     <!-- TAB: OVERVIEW -->
@@ -45,9 +48,10 @@
           </div>
         </div>
         <div class="glass" style="padding: 1.5rem;">
-          <h3 class="kpi-label" style="margin-bottom: 1.5rem;">Market Exposure (Beta)</h3>
-          <div style="height: 400px;">
-            <canvas id="betaChart"></canvas>
+          <h3 class="kpi-label" style="margin-bottom: 1.5rem;">Market Exposure & Sector Distribution</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div style="height: 350px;"><canvas id="betaChart"></canvas></div>
+            <div style="height: 350px;"><canvas id="overviewSectorPie"></canvas></div>
           </div>
         </div>
       </div>
@@ -80,6 +84,66 @@
             <tbody id="layerTableBody"></tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+    <!-- TAB: CHURNING -->
+    <section id="tab-churning" class="tab-pane">
+      <div class="glass" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+        <h3 class="kpi-label">Strategy Churning Dynamics</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+          <div style="height: 300px;"><canvas id="churnAddChart"></canvas></div>
+          <div style="height: 300px;"><canvas id="churnRemChart"></canvas></div>
+        </div>
+      </div>
+      <div class="glass" style="padding: 1.5rem;">
+        <table class="data-table">
+          <thead>
+            <tr><th>Month</th><th>Count</th><th>Base Add</th><th>ST Add</th><th>EMA Add</th><th>Base Rem</th><th>ST Rem</th></tr>
+          </thead>
+          <tbody id="churningBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB: PORTFOLIO -->
+    <section id="tab-portfolio" class="tab-pane">
+      <div class="kpi-grid" id="portKpis" style="margin-top: 1rem;"></div>
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <div class="glass" style="padding: 1.5rem;">
+          <h3 class="kpi-label">Current Holdings Detail</h3>
+          <table class="data-table">
+            <thead>
+              <tr><th>Symbol</th><th>Sector</th><th>Weight</th><th>LTP</th><th>Today%</th><th>Action</th></tr>
+            </thead>
+            <tbody id="holdingsBody"></tbody>
+          </table>
+        </div>
+        <div class="glass" style="padding: 1.5rem;">
+          <h3 class="kpi-label">Sector Allocation</h3>
+          <div style="height: 350px;"><canvas id="portSector"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: TRADES -->
+    <section id="tab-trades" class="tab-pane">
+      <div class="glass" style="padding: 1.5rem;">
+        <h3 class="kpi-label">Recent Execution History</h3>
+        <table class="data-table">
+          <thead>
+            <tr><th>Month</th><th>Symbol</th><th>Action</th><th>Qty</th><th>Price</th><th>Return</th></tr>
+          </thead>
+          <tbody id="tradesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB: EQUITY -->
+    <section id="tab-equity" class="tab-pane">
+      <div class="glass" style="padding: 1.5rem;">
+        <h3 class="kpi-label">Full Backtest Growth</h3>
+        <div style="height: 500px;"><canvas id="equityMain"></canvas></div>
       </div>
     </section>
 

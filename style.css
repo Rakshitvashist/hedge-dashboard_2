@@ -165,10 +165,22 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; }
   transition: 0.2s;
 }
 
-.tab-btn.active {
+.tab-btn.active, .univ-btn.active {
   background: var(--cyan);
   color: var(--bg-deep);
   box-shadow: 0 4px 15px var(--cyan-glow);
+}
+
+.univ-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 0.75rem;
 }
 
 /* ── HEATMAP ───────────────────────────────────────────── */
