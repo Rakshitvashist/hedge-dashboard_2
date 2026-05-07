@@ -14,25 +14,36 @@
 
   --cyan:    #22d3ee;
   --gold:    #f59e0b;
+  --bg-0: #0a0e14;
+  --bg-1: #0f172a;
+  --bg-2: #1e293b;
+  --border: rgba(255,255,255,0.08);
+  --white: #f8fafc;
+  --slate: #94a3b8;
+  --muted: #64748b;
+  
+  --cyan: #22d3ee;
   --emerald: #10b981;
-  --rose:    #f43f5e;
-  --violet:  #8b5cf6;
-  --slate:   #94a3b8;
-  --white:   #f8fafc;
+  --rose: #f43f5e;
+  --gold: #f59e0b;
+  --violet: #8b5cf6;
+  
+  --glow-c: rgba(34,211,238,0.3);
+  --radius: 1rem;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'Roboto Mono', monospace;
+  --trans: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-  --glow-c:  rgba(34,211,238,.25);
-  --glow-g:  rgba(245,158,11,.2);
-
-  --border:  rgba(255,255,255,.07);
-  --border-a:rgba(34,211,238,.25);
-
-  --font:    'Inter', sans-serif;
-  --mono:    'Roboto Mono', monospace;
-
-  --radius:  1rem;
-  --radius-sm: .5rem;
-
-  --trans:   all .25s cubic-bezier(.4,0,.2,1);
+:root[data-theme="light"] {
+  --bg-0: #f1f5f9;
+  --bg-1: #ffffff;
+  --bg-2: #e2e8f0;
+  --border: rgba(0,0,0,0.08);
+  --white: #0f172a;
+  --slate: #475569;
+  --muted: #64748b;
+  --glow-c: rgba(34,211,238,0.2);
 }
 
 /* ── RESET ────────────────────────────────────────────── */
@@ -50,7 +61,43 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition: background 0.5s ease, color 0.5s ease;
 }
+
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(34,211,238,.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(139,92,246,.03) 0%, transparent 60%);
+}
+
+/* ── THEME TOGGLE ─────────────────────────────── */
+.theme-toggle {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  transition: var(--trans);
+  color: var(--white);
+}
+
+:root[data-theme="light"] .theme-toggle {
+  background: rgba(0,0,0,0.05);
+}
+
+.theme-toggle:hover {
+  transform: rotate(15deg) scale(1.1);
+  background: rgba(255,255,255,0.1);
+}
+
+.theme-toggle .sun { display: none; }
+.theme-toggle .moon { display: block; }
+
+:root[data-theme="light"] .theme-toggle .sun { display: block; }
+:root[data-theme="light"] .theme-toggle .moon { display: none; }
+
 
 /* Subtle CRT scanline overlay */
 body::before {

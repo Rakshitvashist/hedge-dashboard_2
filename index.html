@@ -39,12 +39,14 @@
         </div>
       </div>
       <div class="header-right">
-        <div class="univ-switch">
-          <button class="univ-btn active" id="btn-n50" onclick="switchUniverse('nifty50')">
-            <span class="univ-icon">◆</span> Nifty 50
-          </button>
-          <button class="univ-btn" id="btn-n500" onclick="switchUniverse('nifty500')">
-            <span class="univ-icon">◆</span> Nifty 500
+        <div class="nav-right">
+          <div class="universe-tabs">
+            <button class="uni-btn active" id="btn-n50" onclick="switchUniverse('nifty50')">Nifty 50</button>
+            <button class="uni-btn" id="btn-n500" onclick="switchUniverse('nifty500')">Nifty 500</button>
+          </div>
+          <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+            <span class="sun">☀️</span>
+            <span class="moon">🌙</span>
           </button>
         </div>
       </div>

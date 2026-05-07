@@ -1,14 +1,14 @@
 /* SOM Institutional Terminal - app.js */
 
 const LAYERS = {
-  Base:        { label: 'Base SIM',      color: '#94a3b8', cls: 'ltag-base' },
-  ST:          { label: 'ST Filter',     color: '#22d3ee', cls: 'ltag-st' },
+  Base:        { label: 'Base SIM',      color: '#22d3ee', cls: 'ltag-base' },
+  ST:          { label: 'ST Filter',     color: '#8b5cf6', cls: 'ltag-st' },
   EMA:         { label: 'EMA Filter',    color: '#10b981', cls: 'ltag-ema' },
   COMBO:       { label: 'COMBO Filter',  color: '#f59e0b', cls: 'ltag-combo' },
-  ULTRA:       { label: 'ULTRA Layer',   color: '#8b5cf6', cls: 'ltag-ultra' },
+  ULTRA:       { label: 'ULTRA Layer',   color: '#ec4899', cls: 'ltag-ultra' },
   COMBO_HEDGE: { label: 'COMBO+Hedge',   color: '#06b6d4', cls: 'ltag-ch' },
   ULTRA_HEDGE: { label: 'ULTRA Defense', color: '#f43f5e', cls: 'ltag-uh' },
-  Bench:       { label: 'Benchmark',     color: 'rgba(255,255,255,0.3)', cls: 'ltag-bench' }
+  Bench:       { label: 'Benchmark',     color: '#94a3b8', cls: 'ltag-bench' }
 };
 
 let state = { 
@@ -46,6 +46,14 @@ function switchChartType(id, type) {
   renderTab(state.tab);
 }
 
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const target = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', target);
+  localStorage.setItem('som-theme', target);
+  renderTab(state.tab);
+}
+
 function closeModal() {
   document.getElementById('hmModal').classList.remove('open');
 }
@@ -53,7 +61,12 @@ function closeModal() {
 window.switchUniverse = switchUniverse;
 window.switchTab = switchTab;
 window.switchChartType = switchChartType;
+window.toggleTheme = toggleTheme;
 window.closeModal = closeModal;
+
+// Init theme
+const savedTheme = localStorage.getItem('som-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
 
 /* ── CHART HELPER ────────────────────────────── */
 function mkChart(id, defaultType, data, options) {
@@ -76,6 +89,11 @@ function mkChart(id, defaultType, data, options) {
     });
   }
 
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const gridCol = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)';
+  const tickCol = isLight ? '#475569' : '#64748b';
+  const labelCol = isLight ? '#1e293b' : '#94a3b8';
+
   const defaults = {
     responsive: true, maintainAspectRatio: false,
     interaction: {
@@ -83,12 +101,12 @@ function mkChart(id, defaultType, data, options) {
       mode: 'index',
     },
     plugins: { 
-      legend: { labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } },
+      legend: { labels: { color: labelCol, boxWidth: 10, font: { size: 10 } } },
       tooltip: {
-        backgroundColor: 'rgba(10, 22, 42, 0.95)',
-        titleColor: '#22d3ee',
-        bodyColor: '#e2e8f0',
-        borderColor: 'rgba(34, 211, 238, 0.2)',
+        backgroundColor: isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(10, 22, 42, 0.95)',
+        titleColor: isLight ? '#06b6d4' : '#22d3ee',
+        bodyColor: isLight ? '#1e293b' : '#e2e8f0',
+        borderColor: isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(34, 211, 238, 0.2)',
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,
@@ -109,8 +127,8 @@ function mkChart(id, defaultType, data, options) {
       }
     },
     scales: {
-      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', maxTicksLimit: 12 } },
-      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b' } }
+      x: { grid: { color: gridCol }, ticks: { color: tickCol, maxTicksLimit: 12 } },
+      y: { grid: { color: gridCol }, ticks: { color: tickCol } }
     }
   };
 
@@ -127,7 +145,7 @@ function mkChart(id, defaultType, data, options) {
         ctx.moveTo(x, yAxis.top);
         ctx.lineTo(x, yAxis.bottom);
         ctx.lineWidth = 1;
-        ctx.strokeStyle = 'rgba(34, 211, 238, 0.3)';
+        ctx.strokeStyle = isLight ? 'rgba(0, 0, 0, 0.2)' : 'rgba(34, 211, 238, 0.3)';
         ctx.setLineDash([5, 5]);
         ctx.stroke();
         ctx.restore();
@@ -215,17 +233,18 @@ function renderOverview(d) {
 
   // Equity chart
   const ec = d.equity_curves;
+  const datasets = Object.keys(LAYERS).map(l => ({
+    label: LAYERS[l].label, data: ec[l] || [],
+    borderColor: LAYERS[l].color, borderWidth: l === 'Bench' ? 1 : 2,
+    borderDash: l === 'Bench' ? [5,4] : [],
+    pointRadius: 0, tension: 0.3, fill: false
+  }));
+  console.log(`[Equity Overview] Rendering ${datasets.length} layers.`);
+
   mkChart('equityOverview', 'line', {
     labels: ec.months,
-    datasets: Object.keys(LAYERS).map(l => ({
-      label: LAYERS[l].label, data: ec[l],
-      borderColor: LAYERS[l].color, borderWidth: l === 'Bench' ? 1 : 2,
-      borderDash: l === 'Bench' ? [5,4] : [],
-      pointRadius: 0, tension: 0.3, fill: false
-    }))
-  }, { plugins: { legend: { position: 'bottom', labels: { color:'#94a3b8', boxWidth:10, font:{size:10} } } },
-       scales: { x: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b', maxTicksLimit:12} },
-                 y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#64748b'} } } });
+    datasets: datasets
+  }, { plugins: { legend: { position: 'top' } } });
 
   // Sector pie
   renderSectorPie('overviewSectorPie', d.current_portfolio || []);
@@ -377,18 +396,20 @@ window.openHeatModal = openHeatModal;
 ══════════════════════════════════════════════ */
 function renderEquity(d) {
   const ec = d.equity_curves;
+  const datasets = Object.keys(LAYERS).map(l => ({
+    label: LAYERS[l].label, data: ec[l] || [],
+    borderColor: LAYERS[l].color, borderWidth: l === 'Bench' ? 1.5 : 2.5,
+    borderDash: l === 'Bench' ? [6,4] : [],
+    pointRadius: 0, tension: 0.3, fill: false
+  }));
+  console.log(`[Equity Main] Rendering ${datasets.length} layers.`);
+
   mkChart('equityMain', 'line', {
     labels: ec.months,
-    datasets: Object.keys(LAYERS).map(l => ({
-      label: LAYERS[l].label, data: ec[l],
-      borderColor: LAYERS[l].color, borderWidth: l === 'Bench' ? 1.5 : 2,
-      borderDash: l === 'Bench' ? [6,4] : [],
-      pointRadius: 0, tension: 0.3, fill: false
-    }))
-  }, { plugins: { legend: { position: 'bottom', labels:{color:'#94a3b8',boxWidth:10,font:{size:10}} } },
-       scales: { x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',maxTicksLimit:12}},
-                 y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#64748b',
-                   callback: v => '₹' + v.toFixed(2)}} } });
+    datasets: datasets
+  }, { plugins: { legend: { position: 'top' } },
+       scales: { y: { callback: v => '₹' + v.toFixed(2) } } 
+  });
 }
 
 /* ══════════════════════════════════════════════
