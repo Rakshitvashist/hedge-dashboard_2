@@ -981,6 +981,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   Chart.defaults.color = savedTheme === 'light' ? '#475569' : '#94a3b8';
   Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.animation = { duration: 400 }; // Snappy animations
+  Chart.defaults.datasets.line.normalized = true;
+  Chart.defaults.datasets.line.spanGaps = true;
 
   const d = DASHBOARD_DATA;
   document.getElementById('last-refresh').textContent =
@@ -989,16 +992,16 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.particlesJS) {
     particlesJS('particles-js', {
       particles: {
-        number:{value:25,density:{enable:true,value_area:900}},
+        number:{value:15,density:{enable:true,value_area:1000}}, // Reduced count
         color:{value:['#22d3ee','#f59e0b']},
         shape:{type:'circle'},
-        opacity:{value:0.12,random:true},
-        size:{value:1.5,random:true},
-        line_linked:{enable:true,distance:160,color:'#22d3ee',opacity:0.06,width:1},
-        move:{enable:true,speed:0.4,random:true,out_mode:'out'}
+        opacity:{value:0.08,random:true},
+        size:{value:1.2,random:true},
+        line_linked:{enable:true,distance:180,color:'#22d3ee',opacity:0.04,width:1},
+        move:{enable:true,speed:0.3,random:true,out_mode:'out'}
       },
-      interactivity:{ events:{onhover:{enable:true,mode:'grab'}} },
-      retina_detect:true
+      interactivity:{ events:{onhover:{enable:false}} }, // Disabled hover interaction for FPS
+      retina_detect:false
     });
   }
 

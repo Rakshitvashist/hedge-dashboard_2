@@ -227,9 +227,8 @@ body::before {
 /* ── LAYOUT ───────────────────────────────────────────── */
 .app-container {
   position: relative; z-index: 10;
-  max-width: 1700px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  max-width: 1600px; margin: 0 auto; padding: 2rem;
+  will-change: transform;
 }
 
 .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
@@ -355,14 +354,14 @@ body::before {
 
 /* ── GLASS CARD ────────────────────────────────────────── */
 .glass-card {
-  background: var(--bg-2);
-  backdrop-filter: blur(14px) saturate(160%);
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 1.25rem;
   padding: 1.5rem;
-  transition: var(--trans);
-  position: relative;
-  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  will-change: transform, opacity;
 }
 
 .glass-card::before {
