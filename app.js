@@ -52,7 +52,9 @@ const chartBase = (extra={}) => ({
   scales: {
     x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { maxTicksLimit: 12, color: '#475569', font: { size: 10 } } },
     y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#475569', font: { size: 10 } } }
-  }, ...extra
+  },
+  elements: { line: { tension: 0.4 } },
+  ...extra
 });
 
 // ── HELPERS ──────────────────────────────────────────────
@@ -101,23 +103,23 @@ function renderTabContent(tab) {
   if(tab==='overview')  renderOverview(d);
   if(tab==='layers')    renderLayers(d);
   if(tab==='equity')    renderEquity(d);
-  if(tab==='heatmap')   renderHeatmap();
+  if(tab==='churning')  renderChurning(d);
   if(tab==='portfolio') renderPortfolio(d);
   if(tab==='trades')    renderTrades(d);
 }
 
 // ── OVERVIEW ─────────────────────────────────────────────
 function renderOverview(d) {
-  const uh = d.layer_metrics.ULTRA_HEDGE;
+  const base = d.layer_metrics.Base;
   const kpis = [
-    { icon:'📈', label:'CAGR (ULTRA Defense)', id:'kv0', val:uh.CAGR, unit:'%', color:'green',  sub:'Annualized' },
+    { icon:'📈', label:'CAGR (Base SIM)',      id:'kv0', val:base.CAGR, unit:'%', color:'green',  sub:'Annualized' },
     { icon:'⚡', label:'Avg Ex-Ante Sharpe',   id:'kv1', val:d.avg_ex_ante_sr, unit:'', color:'cyan', sub:'Forward-looking avg' },
-    { icon:'🎯', label:'Realized Sharpe',      id:'kv2', val:uh.Sharpe, unit:'', color:'gold',  sub:'Risk-adjusted' },
-    { icon:'📉', label:'Max Drawdown',         id:'kv3', val:uh.Max_DD, unit:'%', color:'red',   sub:'Peak-to-trough' },
-    { icon:'💰', label:'Total Return',         id:'kv4', val:uh.Total_Return, unit:'%', color:'green', sub:`${d.total_months}M backtest` },
-    { icon:'🏆', label:'Win Rate',             id:'kv5', val:uh.Win_Rate, unit:'%', color:'orange', sub:'Positive months' },
-    { icon:'🔺', label:'Alpha vs Bench',       id:'kv6', val:uh.Alpha, unit:'%', color:'cyan', sub:'Annual excess' },
-    { icon:'🔵', label:'Sortino Ratio',        id:'kv7', val:uh.Sortino, unit:'', color:'purple', sub:'Downside-adjusted' }
+    { icon:'📊', label:'Monthly Stock Count',  id:'kv2', val:d.monthly_detail[d.monthly_detail.length-1].Stock_Count, unit:'', color:'gold',  sub:'Active holdings' },
+    { icon:'📉', label:'Max Drawdown (Base)',  id:'kv3', val:base.Max_DD, unit:'%', color:'red',   sub:'Peak-to-trough' },
+    { icon:'💰', label:'Total Return (Base)',  id:'kv4', val:base.Total_Return, unit:'%', color:'green', sub:`${d.total_months}M backtest` },
+    { icon:'🏆', label:'Win Rate (Base)',      id:'kv5', val:base.Win_Rate, unit:'%', color:'orange', sub:'Positive months' },
+    { icon:'🔺', label:'Alpha vs Bench',       id:'kv6', val:base.Alpha, unit:'%', color:'cyan', sub:'Annual excess' },
+    { icon:'🔵', label:'Sortino Ratio (Base)', id:'kv7', val:base.Sortino, unit:'', color:'purple', sub:'Downside-adjusted' }
   ];
 
   $('kpi-row').innerHTML = kpis.map((k,i) => `
@@ -286,38 +288,55 @@ function toggleLayer(l) {
   buildEquityChart(DASHBOARD_DATA[universe]);
 }
 
-// ── HEATMAP ──────────────────────────────────────────────
-function renderHeatmap() {
-  const layer = $('hmSelect')?.value || 'ULTRA_HEDGE';
-  const data  = DASHBOARD_DATA[universe]?.heatmap?.[layer];
-  if(!data) return;
-
-  const rows = data.map(row => {
-    const vals = MONTHS.map(m=>row[m]).filter(v=>v!=null);
-    return { ...row, total: vals.length ? +vals.reduce((a,b)=>a+b,0).toFixed(2) : null };
-  });
-
-  function heatBg(v) {
-    if(v==null) return 'rgba(255,255,255,0.03)';
-    const i = Math.min(Math.abs(v)/12, 1);
-    return v>0 ? `rgba(0,255,136,${0.08+i*0.65})` : `rgba(255,0,85,${0.08+i*0.65})`;
+// ── CHURNING ANALYSIS ──────────────────────────────────────
+function renderChurning(d) {
+  const churn = d.churning_data;
+  if (!churn || !churn.length) {
+    $('churningBody').innerHTML = '<tr><td colspan="12">No churning data available.</td></tr>';
+    return;
   }
-  function heatFg(v) { return v==null?'#334155':v>=0?'#00ff88':'#ff6b9d'; }
 
-  const cols = `70px repeat(12, 1fr) 85px`;
-  let html = `<div style="display:grid;grid-template-columns:${cols};gap:3px;min-width:920px">`;
-  html += `<div class="hm-head"></div>${MONTHS.map(m=>`<div class="hm-head">${m}</div>`).join('')}<div class="hm-head">Total</div>`;
-  rows.forEach(row => {
-    html += `<div class="hm-year">${row.year}</div>`;
-    MONTHS.forEach(m => {
-      const v = row[m];
-      html += `<div class="hm-cell" style="background:${heatBg(v)};color:${heatFg(v)}">${v!=null?(v>0?'+':'')+v.toFixed(1)+'%':'—'}</div>`;
-    });
-    const t = row.total;
-    html += `<div class="hm-cell" style="background:${heatBg(t)};color:${heatFg(t)};font-weight:800">${t!=null?(t>0?'+':'')+t.toFixed(1)+'%':'—'}</div>`;
+  // Churn Add Chart
+  destroyChart('churnAddChart');
+  charts['churnAddChart'] = new Chart($('churnAddChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: churn.map(r => r.Month),
+      datasets: [
+        { label: 'Base Add', data: churn.map(r => r['Base Add']), borderColor: '#94a3b8', tension: 0.4, pointRadius: 2 },
+        { label: 'ST Add', data: churn.map(r => r['ST Add']), borderColor: '#60a5fa', tension: 0.4, pointRadius: 2 },
+        { label: 'EMA Add', data: churn.map(r => r['EMA Add']), borderColor: '#00ff88', tension: 0.4, pointRadius: 2 },
+        { label: 'COMBO Add', data: churn.map(r => r['COMBO Add']), borderColor: '#d4af37', tension: 0.4, pointRadius: 2 },
+        { label: 'ULTRA Add', data: churn.map(r => r['ULTRA Add']), borderColor: '#c39bd3', tension: 0.4, pointRadius: 2 }
+      ]
+    },
+    options: chartBase()
   });
-  html += '</div>';
-  $('hmContainer').innerHTML = html;
+
+  // Churn Rem Chart
+  destroyChart('churnRemChart');
+  charts['churnRemChart'] = new Chart($('churnRemChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: churn.map(r => r.Month),
+      datasets: [
+        { label: 'Base Rem', data: churn.map(r => r['Base Rem']), borderColor: '#94a3b8', tension: 0.4, pointRadius: 2 },
+        { label: 'ST Rem', data: churn.map(r => r['ST Rem']), borderColor: '#60a5fa', tension: 0.4, pointRadius: 2 },
+        { label: 'EMA Rem', data: churn.map(r => r['EMA Rem']), borderColor: '#00ff88', tension: 0.4, pointRadius: 2 },
+        { label: 'COMBO Rem', data: churn.map(r => r['COMBO Rem']), borderColor: '#d4af37', tension: 0.4, pointRadius: 2 },
+        { label: 'ULTRA Rem', data: churn.map(r => r['ULTRA Rem']), borderColor: '#c39bd3', tension: 0.4, pointRadius: 2 }
+      ]
+    },
+    options: chartBase()
+  });
+
+  $('churningBody').innerHTML = [...churn].reverse().map(r => `
+    <tr>
+      <td>${r.Month}</td>
+      <td style="font-weight:800">${r.Stock_Count}</td>
+      <td class="green">${r['Base Add']}</td><td class="green">${r['ST Add']}</td><td class="green">${r['EMA Add']}</td><td class="green">${r['COMBO Add']}</td><td class="green">${r['ULTRA Add']}</td>
+      <td class="red">${r['Base Rem']}</td><td class="red">${r['ST Rem']}</td><td class="red">${r['EMA Rem']}</td><td class="red">${r['COMBO Rem']}</td><td class="red">${r['ULTRA Rem']}</td>
+    </tr>`).join('');
 }
 
 // ── LIVE PORTFOLIO ────────────────────────────────────────

@@ -353,7 +353,7 @@ body {
     <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
     <button class="tab-btn" onclick="switchTab('layers')">⚡ All Layers</button>
     <button class="tab-btn" onclick="switchTab('equity')">📈 Equity Curves</button>
-    <button class="tab-btn" onclick="switchTab('heatmap')">🟩 Heatmap</button>
+    <button class="tab-btn" onclick="switchTab('churning')">🔄 Churning Analysis</button>
     <button class="tab-btn" onclick="switchTab('portfolio')">💼 Live Portfolio</button>
     <button class="tab-btn" onclick="switchTab('trades')">📋 Execution Log</button>
   </nav>
@@ -421,23 +421,37 @@ body {
     </div>
   </div>
 
-  <!-- ── HEATMAP ──────────────────────────────── -->
-  <div id="tab-heatmap" class="tab-pane">
+  <!-- ── CHURNING ANALYSIS ──────────────────────────────── -->
+  <div id="tab-churning" class="tab-pane">
     <div class="glass" style="padding:1.5rem">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem">
-        <p class="card-title" style="margin:0">Monthly Return Calendar Heatmap</p>
-        <select class="hm-select" id="hmSelect" onchange="renderHeatmap()">
-          <option value="ULTRA_HEDGE">ULTRA Defense</option>
-          <option value="COMBO_HEDGE">COMBO + Hedge</option>
-          <option value="ULTRA">ULTRA Layer</option>
-          <option value="COMBO">COMBO Filter</option>
-          <option value="EMA">EMA Filter</option>
-          <option value="ST">ST Filter</option>
-          <option value="Base">Base SIM</option>
-          <option value="Bench">Benchmark</option>
-        </select>
+        <p class="card-title" style="margin:0">Portfolio Churning Dynamics</p>
       </div>
-      <div style="overflow-x:auto"><div id="hmContainer"></div></div>
+      
+      <div class="charts-row" style="margin-bottom:2rem">
+        <div class="chart-card">
+          <p class="card-title">Monthly Strategy Inclusions</p>
+          <div class="chart-wrap" style="height:280px"><canvas id="churnAddChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <p class="card-title">Monthly Strategy Removals</p>
+          <div class="chart-wrap" style="height:280px"><canvas id="churnRemChart"></canvas></div>
+        </div>
+      </div>
+      
+      <p class="card-title" style="margin-top:2rem">Churning Analysis Detail</p>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Month</th><th>Stock Count</th>
+              <th>Base Add</th><th>ST Add</th><th>EMA Add</th><th>COMBO Add</th><th>ULTRA Add</th>
+              <th>Base Rem</th><th>ST Rem</th><th>EMA Rem</th><th>COMBO Rem</th><th>ULTRA Rem</th>
+            </tr>
+          </thead>
+          <tbody id="churningBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 

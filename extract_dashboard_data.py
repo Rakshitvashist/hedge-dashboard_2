@@ -258,6 +258,18 @@ for universe in ['nifty50', 'nifty500']:
     # 4. Equity Curves (cumulative)
     equity_curves = get_equity_curves(df_sum)
     
+    # 5. Churning Analysis
+    try:
+        df_churn = pd.read_excel(xl, sheet_name='Churning_Analysis')
+        df_churn['Month'] = df_churn['Month'].astype(str)
+        churning_data = df_churn.to_dict(orient='records')
+        for row in churning_data:
+            for k, v in row.items():
+                if isinstance(v, float):
+                    row[k] = safe_float(v)
+    except:
+        churning_data = []
+    
     # 5. Heatmaps for all 7 layers
     heatmaps = {}
     for layer in ['Base', 'ST', 'EMA', 'COMBO', 'ULTRA', 'COMBO_HEDGE', 'ULTRA_HEDGE', 'Bench']:
@@ -305,6 +317,7 @@ for universe in ['nifty50', 'nifty500']:
         'avg_ex_ante_sr': avg_ex_ante_sr,
         'layer_metrics': layer_metrics,
         'equity_curves': equity_curves,
+        'churning_data': churning_data,
         'heatmaps': heatmaps,
         'monthly_detail': monthly_detail,
         'current_portfolio': current_portfolio,
