@@ -902,17 +902,48 @@ function renderChurning(d) {
 function renderPortfolio(d) {
   const port = d.current_portfolio || [];
   const last = d.monthly_detail[d.monthly_detail.length - 1] || {};
+  const lp   = d.live_performance || {};
 
+  // ── Row 1: Portfolio/Benchmark KPIs ──────────
   document.getElementById('portKpis').innerHTML = [
-    { label:'Holdings',      val:port.length,          unit:'',  color:'#22d3ee', accent:'#22d3ee' },
-    { label:'Portfolio Beta',val:+(last.Port_Beta||0).toFixed(2), unit:'', color:'#f59e0b', accent:'#f59e0b' },
-    { label:'Stock Count',   val:+(last.Stock_Count||0), unit:'', color:'#10b981', accent:'#10b981' }
+    { label:'Holdings',      val:port.length,          color:'#22d3ee', accent:'#22d3ee' },
+    { label:'Portfolio Beta',val:+(last.Port_Beta||0).toFixed(2), color:'#f59e0b', accent:'#f59e0b' },
+    { label:'Stock Count',   val:+(last.Stock_Count||0), color:'#10b981', accent:'#10b981' }
   ].map(k => `
     <div class="kpi-card" style="--accent:${k.accent}">
       <span class="kpi-label">${k.label}</span>
-      <span class="kpi-value" style="color:${k.color}">${typeof k.val==='number'?k.val.toFixed(2):k.val}${k.unit}</span>
+      <span class="kpi-value" style="color:${k.color}">${typeof k.val==='number'?k.val.toFixed(2):k.val}</span>
     </div>`).join('');
 
+  // ── Row 2: Live Performance + MTD ────────────
+  const portRet  = lp.portfolio_ret  || 0;
+  const benchRet = lp.benchmark_ret  || 0;
+  const alpha    = lp.alpha          || 0;
+  const portMtd  = lp.portfolio_mtd  || 0;
+  const benchMtd = lp.benchmark_mtd  || 0;
+  const alphaMtd = lp.alpha_mtd      || 0;
+
+  const arrow = (v) => v >= 0 ? '▲' : '▼';
+  const sign  = (v) => v >= 0 ? '+' : '';
+  const col   = (v) => v >= 0 ? '#10b981' : '#f43f5e';
+
+  document.getElementById('portPerformanceKpis').innerHTML = [
+    { label:'Portfolio Today', val:portRet,  extra: arrow(portRet),  color: col(portRet),  accent:'#10b981' },
+    { label:'Benchmark Today', val:benchRet, extra: arrow(benchRet), color: col(benchRet), accent:'#94a3b8' },
+    { label:'Daily Alpha',     val:alpha,    extra:'α',               color: col(alpha),    accent:'#22d3ee' },
+    { label:'Portfolio MTD',   val:portMtd,  extra: arrow(portMtd),  color: col(portMtd),  accent:'#10b981' },
+    { label:'Benchmark MTD',   val:benchMtd, extra: arrow(benchMtd), color: col(benchMtd), accent:'#94a3b8' },
+    { label:'MTD Alpha',       val:alphaMtd, extra:'α',               color: col(alphaMtd), accent:'#22d3ee' },
+  ].map(k => `
+    <div class="kpi-card" style="--accent:${k.accent}">
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+        <span class="kpi-label">${k.label}</span>
+        <span style="font-size:0.75rem;color:${k.color};font-weight:700">${k.extra}</span>
+      </div>
+      <span class="kpi-value" style="color:${k.color}">${sign(k.val)}${k.val.toFixed(2)}%</span>
+    </div>`).join('');
+
+  // ── Holdings table ─────────────────────────
   const cleanPort = port.filter(s => s.clean_symbol && s.clean_symbol !== 'Stock');
 
   document.getElementById('holdingsBody').innerHTML = cleanPort.map((s,i) => {

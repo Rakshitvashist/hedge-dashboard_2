@@ -160,41 +160,86 @@ def get_current_portfolio(xl, sector_map):
     return stocks
 
 def get_live_prices(symbols):
-    """Read last 2 rows of each CSV to get today's change."""
+    """Read last 2 rows of each CSV to get today's change % and MTD baseline close."""
     results = {}
     for sym in symbols:
-        ticker = sym.split('_')[0]
         found = False
         for folder in ['nifty50_host', 'nifty500_host']:
             path = os.path.join(folder, sym + '.csv') if not sym.endswith('.csv') else os.path.join(folder, sym)
             if not os.path.exists(path):
-                # try without extension
                 path2 = os.path.join(folder, sym.replace('.csv','') + '.csv')
                 if os.path.exists(path2):
                     path = path2
                 else:
                     continue
             try:
-                df = pd.read_csv(path).tail(2)
+                df = pd.read_csv(path)
                 df.columns = [c.lower() for c in df.columns]
-                if len(df) >= 2:
-                    last = df.iloc[-1]
-                    prev = df.iloc[-2]
-                    last_close = safe_float(last.get('close', 0))
-                    prev_close = safe_float(prev.get('close', 0))
-                    chg = round((last_close / prev_close - 1) * 100, 2) if prev_close > 0 else 0
-                    results[sym] = {
-                        'ltp': last_close,
-                        'prev_close': prev_close,
-                        'change_pct': chg,
-                        'date': str(last.get('date', ''))
-                    }
-                    found = True
-                    break
-            except: pass
+                # Parse dates robustly
+                date_col = 'date' if 'date' in df.columns else df.columns[0]
+                df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
+                df = df.dropna(subset=[date_col]).sort_values(date_col)
+                if len(df) < 2:
+                    continue
+                last = df.iloc[-1]
+                prev = df.iloc[-2]
+                last_close = safe_float(last.get('close', 0))
+                prev_close = safe_float(prev.get('close', 0))
+                chg = round((last_close / prev_close - 1) * 100, 2) if prev_close > 0 else 0
+
+                # MTD baseline: last trading day of previous month
+                now = datetime.now()
+                prev_month_end = (now.replace(day=1) - pd.Timedelta(days=1))
+                mtd_df = df[df[date_col].dt.month < now.month]
+                if not mtd_df.empty:
+                    mtd_baseline = safe_float(mtd_df.iloc[-1].get('close', 0))
+                else:
+                    mtd_baseline = last_close  # fallback: no MTD if no prior month data
+                mtd_chg = round((last_close / mtd_baseline - 1) * 100, 2) if mtd_baseline > 0 else 0
+
+                results[sym] = {
+                    'ltp': last_close,
+                    'prev_close': prev_close,
+                    'change_pct': chg,
+                    'mtd_change_pct': mtd_chg,
+                    'date': str(last.get(date_col, ''))
+                }
+                found = True
+                break
+            except:
+                pass
         if not found:
-            results[sym] = {'ltp': 0, 'prev_close': 0, 'change_pct': 0, 'date': 'N/A'}
+            results[sym] = {'ltp': 0, 'prev_close': 0, 'change_pct': 0, 'mtd_change_pct': 0, 'date': 'N/A'}
     return results
+
+def get_benchmark_live_and_mtd(bench_file):
+    """Return (daily_change_pct, mtd_change_pct) for the benchmark index."""
+    if not os.path.exists(bench_file):
+        return 0.0, 0.0
+    try:
+        df = pd.read_csv(bench_file)
+        # Try to find date column
+        date_col = next((c for c in df.columns if 'date' in c.lower() or 'time' in c.lower()), df.columns[0])
+        df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
+        df = df.dropna(subset=[date_col]).sort_values(date_col)
+        close_col = next((c for c in df.columns if 'close' in c.lower() or 'price' in c.lower()), None)
+        if close_col is None or len(df) < 2:
+            return 0.0, 0.0
+        last_close = safe_float(df.iloc[-1][close_col])
+        prev_close = safe_float(df.iloc[-2][close_col])
+        daily = round((last_close / prev_close - 1) * 100, 2) if prev_close > 0 else 0.0
+
+        # MTD baseline
+        now = datetime.now()
+        mtd_df = df[df[date_col].dt.month < now.month]
+        if not mtd_df.empty:
+            mtd_baseline = safe_float(mtd_df.iloc[-1][close_col])
+        else:
+            mtd_baseline = last_close
+        mtd = round((last_close / mtd_baseline - 1) * 100, 2) if mtd_baseline > 0 else 0.0
+        return daily, mtd
+    except:
+        return 0.0, 0.0
 
 def get_sector_map():
     mapping = {}
@@ -343,11 +388,14 @@ for universe in ['nifty50', 'nifty500']:
     for layer in ['Base', 'ST', 'EMA', 'COMBO', 'ULTRA', 'COMBO_HEDGE', 'ULTRA_HEDGE', 'Bench']:
         heatmaps[layer] = get_heatmap_data(df_sum, layer)
     
-    # 6. Monthly detail rows
-    monthly_detail = df_sum[['Month', 'Trade_Month', 'Port_Beta', 'Ex_Ante_Sharpe', 
-                               'Stock_Count', 'Added', 'Removed',
-                               'Base', 'ST', 'EMA', 'COMBO', 'ULTRA', 
-                               'COMBO_HEDGE', 'ULTRA_HEDGE', 'Bench']].to_dict(orient='records')
+    # 6. Monthly detail rows (only include columns that exist)
+    wanted_cols = ['Month', 'Trade_Month', 'Port_Beta', 'Ex_Ante_Sharpe',
+                   'Stock_Count', 'Added', 'Removed',
+                   'Base', 'ST', 'EMA', 'COMBO', 'ULTRA',
+                   'COMBO_HEDGE', 'ULTRA_HEDGE', 'Bench']
+    available_cols = [c for c in wanted_cols if c in df_sum.columns]
+    monthly_detail = df_sum[available_cols].to_dict(orient='records')
+
     
     # Clean floats
     for row in monthly_detail:
@@ -367,6 +415,7 @@ for universe in ['nifty50', 'nifty500']:
         live = live_prices.get(s['symbol'], {})
         s['ltp'] = live.get('ltp', 0)
         s['change_pct'] = live.get('change_pct', 0)
+        s['mtd_change_pct'] = live.get('mtd_change_pct', 0)
         s['prev_close'] = live.get('prev_close', 0)
         s['date'] = live.get('date', '')
     
@@ -382,7 +431,19 @@ for universe in ['nifty50', 'nifty500']:
     
     # 10. Stock Correlation Matrix for Current Portfolio
     stock_corr = get_stock_correlation(symbols)
-    
+
+    # 11. Live & MTD performance for portfolio and benchmark
+    bench_file = 'NIFTY50_1d.csv' if universe == 'nifty50' else 'NIFTY500_1d.csv'
+    bench_daily, bench_mtd = get_benchmark_live_and_mtd(bench_file)
+
+    # Weighted daily and MTD return across portfolio stocks
+    total_wt = sum(s['weight'] for s in current_portfolio if s['weight'] > 0)
+    port_daily = 0.0
+    port_mtd   = 0.0
+    if total_wt > 0:
+        port_daily = round(sum(s['change_pct'] * s['weight'] for s in current_portfolio) / total_wt, 2)
+        port_mtd   = round(sum(s['mtd_change_pct'] * s['weight'] for s in current_portfolio) / total_wt, 2)
+
     output[universe] = {
         'exec_summary': exec_data,
         'avg_ex_ante_sr': avg_ex_ante_sr,
@@ -394,9 +455,18 @@ for universe in ['nifty50', 'nifty500']:
         'current_portfolio': current_portfolio,
         'exec_history': exec_history,
         'stock_correlation': stock_corr,
-        'total_months': len(df_sum)
+        'total_months': len(df_sum),
+        'live_performance': {
+            'portfolio_ret':   port_daily,
+            'benchmark_ret':   bench_daily,
+            'alpha':           round(port_daily - bench_daily, 2),
+            'portfolio_mtd':   port_mtd,
+            'benchmark_mtd':   bench_mtd,
+            'alpha_mtd':       round(port_mtd - bench_mtd, 2),
+            'indicator':       'up' if port_daily >= 0 else 'down'
+        }
     }
-    print(f"  [OK] {universe}: {len(df_sum)} months, Avg Ex-Ante Sharpe: {avg_ex_ante_sr}")
+    print(f"  [OK] {universe}: {len(df_sum)} months | port_daily={port_daily:+.2f}% | port_mtd={port_mtd:+.2f}%")
 
 output['sector_map'] = sector_map
 output['last_update'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S IST")

@@ -1,83 +1,114 @@
 import yfinance as yf
 import pandas as pd
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
-import sys
 
-print("🚀 NIFTY 500 CSV → Daily OHLC CSVs")
-print("📁 INPUT: Your CSV with 'Company Name','Industry','Symbol'")
-print("📁 OUTPUT: nifty500/ → SYMBOL_1d_max.csv")
+print("NIFTY 50 -> Daily OHLC CSVs (Incremental Mode)")
+print("Downloads full history only for NEW stocks.")
+print("For existing stocks, only appends rows since the last date.")
 
-# STEP 1: INPUT CSV FILE (update path)
-input_csv = "ind_nifty50list.csv"  # CHANGE TO YOUR FILE PATH
-
-# STEP 2: Create output folder
+input_csv    = "ind_nifty50list.csv"
 output_folder = "nifty50_host"
 os.makedirs(output_folder, exist_ok=True)
 
-# STEP 3: Read CSV & extract Symbols
-df = pd.read_csv(input_csv)
-symbols = df['Symbol'].dropna().unique().tolist()
-print(f"✅ Found {len(symbols)} symbols: {symbols[:5]}...")
+df_list = pd.read_csv(input_csv)
+symbols = df_list['Symbol'].dropna().unique().tolist()
+print(f"Found {len(symbols)} symbols")
 
 success_count = 0
+skipped_count = 0
 failed_symbols = []
 
 for i, symbol in enumerate(symbols, 1):
     print(f"[{i:3d}/{len(symbols)}] {symbol:<12}", end=" ")
-    
+
     full_symbol = f"{symbol}.NS"
-    
+    filename    = f"{symbol}_1d_max.csv"
+    filepath    = os.path.join(output_folder, filename)
+
+    # Get metadata
+    row     = df_list[df_list['Symbol'] == symbol].iloc[0]
+    company = row['Company Name']
+    industry = row['Industry']
+
     try:
-        ticker = yf.Ticker(full_symbol)
-        data = ticker.history(period="max", interval="1d")
-        
-        if len(data) > 0:
-            # Format: DD-MM-YYYY
+        if os.path.exists(filepath):
+            # --- INCREMENTAL: only fetch rows after last date ---
+            existing = pd.read_csv(filepath)
+            # Find the date column (handles Date or date)
+            date_col = next((c for c in existing.columns if c.lower() == 'date'), None)
+            if date_col is None:
+                raise ValueError("No date column found in existing file")
+            existing[date_col] = pd.to_datetime(existing[date_col], dayfirst=True, errors='coerce')
+            last_date = existing[date_col].dropna().max()
+            if pd.isnull(last_date):
+                raise ValueError("Could not parse last date")
+
+            # Fetch only from the day after last_date
+            start = (last_date + timedelta(days=1)).strftime('%Y-%m-%d')
+            today = datetime.now().strftime('%Y-%m-%d')
+
+            if start >= today:
+                print(f"up-to-date ({last_date.strftime('%d-%m-%Y')})")
+                skipped_count += 1
+                continue
+
+            ticker = yf.Ticker(full_symbol)
+            new_data = ticker.history(start=start, end=today, interval="1d")
+
+            if len(new_data) == 0:
+                print(f"no new rows since {last_date.strftime('%d-%m-%Y')}")
+                skipped_count += 1
+                continue
+
+            new_data.index = new_data.index.strftime("%d-%m-%Y")
+            new_data.reset_index(inplace=True)
+            new_data.rename(columns={"Datetime": "Date", "index": "Date"}, inplace=True)
+
+            meta = pd.DataFrame({
+                "Symbol":   [symbol]   * len(new_data),
+                "Company":  [company]  * len(new_data),
+                "Industry": [industry] * len(new_data),
+                "Index":    ["NIFTY50"] * len(new_data),
+            })
+            new_rows = pd.concat([meta, new_data.reset_index(drop=True)], axis=1)
+
+            # Append to existing file (no header)
+            new_rows.to_csv(filepath, mode='a', header=False, index=False)
+            print(f"+{len(new_data)} new rows  (total: {len(existing)+len(new_data)})")
+            success_count += 1
+
+        else:
+            # --- FULL DOWNLOAD for new stock ---
+            ticker = yf.Ticker(full_symbol)
+            data   = ticker.history(period="max", interval="1d")
+
+            if len(data) == 0:
+                print("NO DATA")
+                continue
+
             data.index = data.index.strftime("%d-%m-%Y")
             data.reset_index(inplace=True)
             data.rename(columns={"Datetime": "Date"}, inplace=True)
-            
-            # Get metadata from input CSV
-            row = df[df['Symbol'] == symbol].iloc[0]
-            company = row['Company Name']
-            industry = row['Industry']
-            
-            # Add metadata columns
-            metadata = pd.DataFrame({
-                "Symbol": [symbol] * len(data),
-                "Company": [company] * len(data),
+
+            meta = pd.DataFrame({
+                "Symbol":   [symbol]   * len(data),
+                "Company":  [company]  * len(data),
                 "Industry": [industry] * len(data),
-                "Index": ["NIFTY500"] * len(data)
+                "Index":    ["NIFTY50"] * len(data),
             })
-            
-            # Combine
-            final_df = pd.concat([metadata, data.reset_index(drop=True)], axis=1)
-            
-            # Save individual CSV
-            filename = f"{symbol}_1d_max.csv"
-            filepath = os.path.join(output_folder, filename)
+            final_df = pd.concat([meta, data.reset_index(drop=True)], axis=1)
             final_df.to_csv(filepath, index=False)
-            
-            print(f"✅ {len(data):,} days")
+            print(f"NEW  {len(data):,} days")
             success_count += 1
-            
-        else:
-            print("⚠️  NO DATA")
-            
+
     except Exception as e:
-        print(f"❌ ERROR: {str(e)[:25]}")
+        print(f"ERROR: {str(e)[:40]}")
         failed_symbols.append(symbol)
-    
-    # Rate limit
+
     time.sleep(0.3)
 
-print(f"\n🎉 COMPLETE: {success_count}/{len(symbols)} → {output_folder}/")
-print(f"📁 {success_count} CSV files ready!")
+print(f"\nDONE: {success_count} updated | {skipped_count} already up-to-date | {len(failed_symbols)} failed")
 if failed_symbols:
-    print(f"⚠️  Failed: {len(failed_symbols)} → {failed_symbols[:5]}")
-
-print("\n📋 EACH CSV FORMAT:")
-print("Symbol,Company,Industry,Index,Date,Open,High,Low,Close,Volume,Dividends,Stock Splits")
-print("\n✅ PERFECT for your analysis pipeline!")
+    print(f"Failed: {failed_symbols[:10]}")
