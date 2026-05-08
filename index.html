@@ -263,6 +263,65 @@
         </div>
       </div>
 
+      <div class="glass-card" style="margin-top:1.5rem">
+        <div class="card-header">
+          <h3 class="card-title">Strategy Definitions</h3>
+          <span class="card-sub">Institutional Logic & Hedge Defense Layers</span>
+        </div>
+        <div class="grid-2" style="margin-top:1rem;">
+          
+          <div class="glass-card" style="padding:1.25rem;">
+            <h4 style="color:#22d3ee; margin-bottom:0.75rem; font-size:1rem;">1. Base SIM (Portfolio Optimization)</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-color);"><strong>What we do:</strong> This is the foundational selection. We calculate individual stock Betas and Residual Variance (σ²) using the Single Index Model (SIM).</p>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-muted);"><strong>Logic:</strong> Stocks are ranked by their Excess Return to Beta (ERB). We calculate a mathematical cut-off (Ci) and select only those stocks that provide "alpha" above this threshold.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted);"><strong>Constraint:</strong> We cap individual stock weights at 10% to prevent over-concentration in any single name.</p>
+          </div>
+
+          <div class="glass-card" style="padding:1.25rem;">
+            <h4 style="color:#8b5cf6; margin-bottom:0.75rem; font-size:1rem;">2. ST Filter (Momentum Defense)</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-color);"><strong>What we do:</strong> We apply a momentum filter to the Base portfolio.</p>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-muted);"><strong>Logic:</strong> We check the Supertrend (10, 3) indicator on a monthly basis for every stock.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted);"><strong>Result:</strong> We only keep stocks that are in a Bullish state (Trend = 1). If a stock's momentum turns bearish, it is immediately removed from this layer to avoid "catching a falling knife."</p>
+          </div>
+
+          <div class="glass-card" style="padding:1.25rem;">
+            <h4 style="color:#10b981; margin-bottom:0.75rem; font-size:1rem;">3. EMA Filter (Trend Defense)</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-color);"><strong>What we do:</strong> We apply a long-term trend filter to the Base portfolio.</p>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-muted);"><strong>Logic:</strong> We calculate the 40-period Exponential Moving Average (EMA).</p>
+            <p style="font-size:0.85rem; color:var(--text-muted);"><strong>Result:</strong> We only retain stocks trading above their EMA-40. This ensures the portfolio is always aligned with the primary long-term trend and ignores stocks in structural downtrends.</p>
+          </div>
+
+          <div class="glass-card" style="padding:1.25rem;">
+            <h4 style="color:#f59e0b; margin-bottom:0.75rem; font-size:1rem;">4. COMBO Filter (High-Conviction Layer)</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-color);"><strong>What we do:</strong> We implement a "Double-Lock" validation system.</p>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-muted);"><strong>Logic:</strong> A stock is only selected if it passes BOTH the Supertrend (ST) and the EMA-40 filter simultaneously.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted);"><strong>Result:</strong> This layer significantly reduces volatility and drawdowns by ensuring we only hold stocks that have both strong momentum and a confirmed long-term trend.</p>
+          </div>
+
+          <div class="glass-card" style="padding:1.25rem;">
+            <h4 style="color:#ec4899; margin-bottom:0.75rem; font-size:1rem;">5. ULTRA Layer (Alpha Concentration)</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-color);"><strong>What we do:</strong> This is a concentrated version of the COMBO selection.</p>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-muted);"><strong>Logic:</strong> It focuses on the elite performers that have cleared all previous institutional filters.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted);"><strong>Result:</strong> It serves as the baseline for the most aggressive hedging strategies when market breadth starts to deteriorate.</p>
+          </div>
+
+          <div class="glass-card" style="padding:1.25rem;">
+            <h4 style="color:#06b6d4; margin-bottom:0.75rem; font-size:1rem;">6. COMBO + Hedge (Active Beta Hedging)</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-color);"><strong>What we do:</strong> We actively neutralize market risk using NIFTY Futures.</p>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-muted);"><strong>Logic:</strong> We monitor Nifty's Multi-Timeframe (MTF) alignment across 15m, 30m, 1h, and 1d timeframes.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted);"><strong>Result:</strong> When all four timeframes turn Bearish, we "Hedge" the portfolio by shorting Nifty Futures proportional to the portfolio's Beta. This protects the gains of the COMBO stocks during market crashes.</p>
+          </div>
+
+          <div class="glass-card" style="padding:1.25rem; grid-column: 1 / -1;">
+            <h4 style="color:#f43f5e; margin-bottom:0.75rem; font-size:1rem;">7. ULTRA Defense (Aggressive Multiplier Hedge)</h4>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-color);"><strong>What we do:</strong> We implement an aggressive "Tail-Risk" protection mechanism.</p>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--text-muted);"><strong>Logic:</strong> We monitor Market Breadth (the ratio of stocks passing the COMBO filter vs. the Base selection).</p>
+            <p style="font-size:0.85rem; color:var(--text-muted);"><strong>Result:</strong> If breadth falls below 50% (indicating a systemic breakdown), we apply a 2.0x Beta multiplier to the Nifty short position. This provides "Super-Hedging" to protect the capital during severe liquidations or "Black Swan" events.</p>
+          </div>
+
+        </div>
+      </div>
+
     </section>
 
     <!-- ═══════════════════════════════════════ -->
@@ -373,8 +432,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.umd.js"></script>
-  <!-- Data must load before app (v1.2.0 Cache Bust) -->
-  <script src="data.js?v=120"></script>
-  <script src="app.js?v=120"></script>
+  <!-- Data must load before app (v1.2.1 Cache Bust) -->
+  <script src="data.js?v=121"></script>
+  <script src="app.js?v=121"></script>
 </body>
 </html>
