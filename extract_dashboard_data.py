@@ -123,7 +123,7 @@ def get_current_portfolio(xl, sector_map):
     # Find header row
     header_row = -1
     for i in range(len(df)):
-        if 'Stock' in str(df.iloc[i, 0]):
+        if str(df.iloc[i, 0]).strip() == 'Stock':
             header_row = i
             break
     if header_row == -1:
