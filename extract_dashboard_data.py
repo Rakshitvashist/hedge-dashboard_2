@@ -178,7 +178,7 @@ def get_live_prices(symbols):
                 # Parse dates robustly
                 date_col = 'date' if 'date' in df.columns else df.columns[0]
                 df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
-                df = df.dropna(subset=[date_col]).sort_values(date_col)
+                df = df.dropna(subset=[date_col]).sort_values(date_col).drop_duplicates(subset=[date_col], keep='last')
                 if len(df) < 2:
                     continue
                 last = df.iloc[-1]
@@ -221,7 +221,7 @@ def get_benchmark_live_and_mtd(bench_file):
         # Try to find date column
         date_col = next((c for c in df.columns if 'date' in c.lower() or 'time' in c.lower()), df.columns[0])
         df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
-        df = df.dropna(subset=[date_col]).sort_values(date_col)
+        df = df.dropna(subset=[date_col]).sort_values(date_col).drop_duplicates(subset=[date_col], keep='last')
         close_col = next((c for c in df.columns if 'close' in c.lower() or 'price' in c.lower()), None)
         if close_col is None or len(df) < 2:
             return 0.0, 0.0
@@ -298,6 +298,7 @@ def get_stock_correlation(symbols):
                 if date_col in df.columns:
                     df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
                     df.set_index(date_col, inplace=True)
+                    df = df[~df.index.duplicated(keep='last')]
                 
                 if len(df) > 10:
                     df['ret'] = df['close'].pct_change()
