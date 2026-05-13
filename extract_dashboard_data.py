@@ -212,7 +212,7 @@ def get_live_prices(symbols):
             results[sym] = {'ltp': 0, 'prev_close': 0, 'change_pct': 0, 'mtd_change_pct': 0, 'date': 'N/A'}
     return results
 
-def get_benchmark_live_and_mtd(bench_file):
+def get_benchmark_live_and_mtd(bench_file, target_date=None):
     """Return (daily_change_pct, mtd_change_pct) for the benchmark index."""
     if not os.path.exists(bench_file):
         return 0.0, 0.0
@@ -222,6 +222,15 @@ def get_benchmark_live_and_mtd(bench_file):
         date_col = next((c for c in df.columns if 'date' in c.lower() or 'time' in c.lower()), df.columns[0])
         df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
         df = df.dropna(subset=[date_col]).sort_values(date_col).drop_duplicates(subset=[date_col], keep='last')
+        
+        # Align with target_date if provided (useful when stock data is lagging)
+        if target_date:
+            try:
+                t_dt = pd.to_datetime(target_date)
+                df = df[df[date_col] <= t_dt]
+            except:
+                pass
+
         close_col = next((c for c in df.columns if 'close' in c.lower() or 'price' in c.lower()), None)
         if close_col is None or len(df) < 2:
             return 0.0, 0.0
@@ -229,9 +238,9 @@ def get_benchmark_live_and_mtd(bench_file):
         prev_close = safe_float(df.iloc[-2][close_col])
         daily = round((last_close / prev_close - 1) * 100, 2) if prev_close > 0 else 0.0
 
-        # MTD baseline
-        now = datetime.now()
-        mtd_df = df[df[date_col].dt.month < now.month]
+        # MTD baseline - using the month of the LAST row in our (potentially filtered) df
+        last_date = df.iloc[-1][date_col]
+        mtd_df = df[df[date_col].dt.month < last_date.month]
         if not mtd_df.empty:
             mtd_baseline = safe_float(mtd_df.iloc[-1][close_col])
         else:
@@ -435,7 +444,15 @@ for universe in ['nifty50', 'nifty500']:
 
     # 11. Live & MTD performance for portfolio and benchmark
     bench_file = 'NIFTY50_1d.csv' if universe == 'nifty50' else 'NIFTY500_1d.csv'
-    bench_daily, bench_mtd = get_benchmark_live_and_mtd(bench_file)
+    
+    # Extract last available date from stocks to align benchmark
+    stock_last_date = None
+    for lp in live_prices.values():
+        if lp.get('date') and lp['date'] != 'N/A':
+            stock_last_date = lp['date']
+            break
+            
+    bench_daily, bench_mtd = get_benchmark_live_and_mtd(bench_file, target_date=stock_last_date)
 
     # Weighted daily and MTD return across portfolio stocks
     total_wt = sum(s['weight'] for s in current_portfolio if s['weight'] > 0)
@@ -498,6 +515,6 @@ if os.path.exists(_html_path):
     with open(_html_path, 'w', encoding='utf-8') as _fh:
         _fh.write(_html)
 
-    print(f"[OK] index.html cache-buster updated → v={_ver}")
+    print(f"[OK] index.html cache-buster updated -> v={_ver}")
 else:
     print("[WARN] index.html not found — cache-buster NOT updated.")

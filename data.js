@@ -4400,11 +4400,11 @@ const DASHBOARD_DATA = {
     "total_months": 61,
     "live_performance": {
       "portfolio_ret": -1.09,
-      "benchmark_ret": -0.49,
-      "alpha": -0.6,
+      "benchmark_ret": -1.83,
+      "alpha": 0.74,
       "portfolio_mtd": -1.52,
-      "benchmark_mtd": -3.05,
-      "alpha_mtd": 1.53,
+      "benchmark_mtd": -2.58,
+      "alpha_mtd": 1.06,
       "indicator": "down"
     }
   },
@@ -9634,11 +9634,11 @@ const DASHBOARD_DATA = {
     "total_months": 61,
     "live_performance": {
       "portfolio_ret": -2.87,
-      "benchmark_ret": -0.4,
-      "alpha": -2.47,
+      "benchmark_ret": -2.18,
+      "alpha": -0.69,
       "portfolio_mtd": -1.78,
-      "benchmark_mtd": -2.08,
-      "alpha_mtd": 0.3,
+      "benchmark_mtd": -1.69,
+      "alpha_mtd": -0.09,
       "indicator": "down"
     }
   },
@@ -10148,5 +10148,5 @@ const DASHBOARD_DATA = {
     "ZYDUSWELL": "Fast Moving Consumer Goods",
     "ECLERX": "Services"
   },
-  "last_update": "2026-05-13 09:44:04 IST"
+  "last_update": "2026-05-13 17:15:47 IST"
 };
