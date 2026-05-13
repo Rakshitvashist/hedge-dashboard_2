@@ -479,3 +479,25 @@ with open('data.js', 'w') as f:
     f.write(";")
 
 print("\n[OK] data.js exported successfully.")
+
+# ── Auto-bump cache-buster in index.html ──────────────────────────────────────
+import re as _re
+import time as _time
+
+_ver = int(_time.time())          # unique integer every run, e.g. 1747127665
+_html_path = 'index.html'
+
+if os.path.exists(_html_path):
+    with open(_html_path, 'r', encoding='utf-8') as _fh:
+        _html = _fh.read()
+
+    # Replace  ?v=<anything>  on the data.js and app.js lines
+    _html = _re.sub(r'(src="data\.js)\?v=\d+(")', rf'\g<1>?v={_ver}\g<2>', _html)
+    _html = _re.sub(r'(src="app\.js)\?v=\d+(")',  rf'\g<1>?v={_ver}\g<2>', _html)
+
+    with open(_html_path, 'w', encoding='utf-8') as _fh:
+        _fh.write(_html)
+
+    print(f"[OK] index.html cache-buster updated → v={_ver}")
+else:
+    print("[WARN] index.html not found — cache-buster NOT updated.")
