@@ -189,7 +189,7 @@ def calculate_ex_ante_metrics(selected_stocks, port_month, all_stocks, rf_annual
             s_hist = s_daily[s_daily.index <= end_date]
             if len(s_hist) > 5:
                 # Get last beta_window * 21 trading days (approx)
-                s_rets = s_hist['close'].pct_change().dropna().tail(beta_window * 21)
+                s_rets = s_hist['close'].pct_change().dropna()
                 if len(s_rets) > 0:
                     returns_list.append(s_rets.rename(sym))
     
@@ -321,6 +321,7 @@ for i, sf in enumerate(stock_files):
             date_col = 'date' if 'date' in sdf.columns else 'time'
             if date_col in sdf.columns:
                 sdf[date_col] = pd.to_datetime(sdf[date_col], dayfirst=True)
+                sdf = sdf.dropna(subset=[date_col]).drop_duplicates(subset=[date_col])
                 all_stocks_daily[sf.stem] = sdf.set_index(date_col).sort_index()
     except: pass
 
@@ -370,7 +371,7 @@ for port_month in all_port_months:
             s_daily = all_stocks_daily.get(ticker, pd.DataFrame())
             if s_daily.empty: continue
             end_date = port_month.to_timestamp(how='end')
-            s_daily_hist = s_daily[s_daily.index <= end_date].tail(BETA_WINDOW * 21)
+            s_daily_hist = s_daily[s_daily.index <= end_date]
             if len(s_daily_hist) < 5: continue
             
             s_returns = s_daily_hist['close'].pct_change().dropna()
