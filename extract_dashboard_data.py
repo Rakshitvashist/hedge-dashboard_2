@@ -379,11 +379,14 @@ for universe in ['nifty50', 'nifty500']:
     # Avg Ex-Ante Sharpe from the actual monthly column
     avg_ex_ante_sr = round(float(df_sum['Ex_Ante_Sharpe'].mean()), 2)
     
-    # 3. Computed metrics for all 7 layers
+    # 3. Computed metrics for all 7 layers + Benchmark
     bench_returns = df_sum['Bench'].values
     layer_metrics = {}
-    for layer in ['Base', 'ST', 'EMA', 'COMBO', 'ULTRA', 'COMBO_HEDGE', 'ULTRA_HEDGE']:
-        layer_metrics[layer] = compute_metrics(df_sum[layer].values, bench_returns)
+    for layer in ['Base', 'ST', 'EMA', 'COMBO', 'ULTRA', 'COMBO_HEDGE', 'ULTRA_HEDGE', 'Bench']:
+        metrics = compute_metrics(df_sum[layer].values, bench_returns)
+        if layer == 'Bench':
+            metrics['Alpha'] = 0.0
+        layer_metrics[layer] = metrics
     
     # 4. Equity Curves (cumulative)
     equity_curves = get_equity_curves(df_sum)

@@ -328,6 +328,19 @@ const DASHBOARD_DATA = {
         "Avg_Loss": -2.62,
         "Alpha": 1.32,
         "Total_Return": 73.35
+      },
+      "Bench": {
+        "CAGR": 9.39,
+        "Volatility": 13.6,
+        "Sharpe": 0.25,
+        "Sortino": 0.41,
+        "Calmar": 0.64,
+        "Max_DD": -14.78,
+        "Win_Rate": 56.5,
+        "Avg_Gain": 3.53,
+        "Avg_Loss": -2.67,
+        "Alpha": 0.0,
+        "Total_Return": 59.01
       }
     },
     "equity_curves": {
@@ -4820,6 +4833,19 @@ const DASHBOARD_DATA = {
         "Avg_Loss": -3.01,
         "Alpha": 0.54,
         "Total_Return": 88.95
+      },
+      "Bench": {
+        "CAGR": 12.13,
+        "Volatility": 14.66,
+        "Sharpe": 0.42,
+        "Sortino": 0.67,
+        "Calmar": 0.67,
+        "Max_DD": -18.0,
+        "Win_Rate": 61.3,
+        "Avg_Gain": 3.67,
+        "Avg_Loss": -3.11,
+        "Alpha": 0.0,
+        "Total_Return": 80.69
       }
     },
     "equity_curves": {
@@ -10344,5 +10370,5 @@ const DASHBOARD_DATA = {
     "ZYDUSWELL": "Fast Moving Consumer Goods",
     "ECLERX": "Services"
   },
-  "last_update": "2026-06-03 10:26:31 IST"
+  "last_update": "2026-06-03 10:50:56 IST"
 };

@@ -745,14 +745,21 @@ window.exportReport = exportReport;
    LAYER METRICS
 ══════════════════════════════════════════════ */
 function renderLayers(d) {
-  const layers7 = Object.keys(LAYERS).filter(l => l !== 'Bench');
+  const layers = Object.keys(LAYERS); // includes 'Bench'
 
   // Table
   // Ex-Ante Sharpe from exec_summary
   const exAnte = d.exec_summary?.['Avg Ex-Ante Sharpe'] || {};
-  document.getElementById('layerTableBody').innerHTML = layers7.map(l => {
+  document.getElementById('layerTableBody').innerHTML = layers.map(l => {
     const m = d.layer_metrics[l];
+    if (!m) return '';
     const ea = exAnte[l] != null ? exAnte[l].toFixed(2) : '—';
+    const isBench = l === 'Bench';
+    
+    // For Benchmark, Alpha is not applicable (it is the benchmark itself)
+    const alphaVal = isBench ? '—' : (m.Alpha >= 0 ? '+' : '') + m.Alpha.toFixed(2) + '%';
+    const alphaClass = isBench ? 'text-muted' : (m.Alpha >= 0 ? 'text-emerald' : 'text-rose');
+    
     return `<tr>
       <td><span class="ltag ${LAYERS[l].cls}">${LAYERS[l].label}</span></td>
       <td class="mono ${m.CAGR>=0?'text-emerald':'text-rose'}" style="font-weight:700">${m.CAGR.toFixed(2)}%</td>
@@ -763,23 +770,27 @@ function renderLayers(d) {
       <td class="mono text-emerald">${m.Avg_Gain.toFixed(2)}%</td>
       <td class="mono text-rose">${m.Avg_Loss.toFixed(2)}%</td>
       <td class="mono text-emerald" style="font-weight:700">${m.Total_Return.toFixed(2)}%</td>
-      <td class="mono ${m.Alpha>=0?'text-emerald':'text-rose'}">${m.Alpha.toFixed(2)}%</td>
+      <td class="mono ${alphaClass}" style="${!isBench ? 'font-weight:700' : ''}">${alphaVal}</td>
     </tr>`;
   }).join('');
 
   // Radar chart
   mkChart('radarChart', 'radar', {
     labels: ['CAGR','Sharpe','Sortino','Win Rate','Alpha'],
-    datasets: layers7.map(l => {
+    datasets: layers.map(l => {
       const m = d.layer_metrics[l];
+      if (!m) return null;
+      const isBench = l === 'Bench';
       return {
         label: LAYERS[l].label,
         data: [m.CAGR/30*100, m.Sharpe/2*100, m.Sortino/3*100, m.Win_Rate, Math.max(0,m.Alpha/20*100)],
         borderColor: LAYERS[l].color,
         backgroundColor: LAYERS[l].color + '18',
-        pointRadius: 3, borderWidth: 2
+        pointRadius: isBench ? 0 : 3,
+        borderWidth: isBench ? 1.5 : 2,
+        borderDash: isBench ? [5, 4] : []
       };
-    })
+    }).filter(Boolean)
   }, { scales: { r: { grid:{color:'rgba(255,255,255,0.08)'}, ticks:{display:false},
                        pointLabels:{color:'#94a3b8',font:{size:10}} } },
        plugins: { legend:{position:'bottom',labels:{color:'#94a3b8',boxWidth:8,font:{size:9}}} } });
