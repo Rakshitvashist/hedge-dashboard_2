@@ -146,15 +146,22 @@ def get_current_portfolio(xl, sector_map):
             continue
         clean_sym = sym.split('_')[0]
         sector = sector_map.get(clean_sym, 'Other')
+        status_val = str(data.iloc[k, status_col]).strip() if status_col is not None else ''
+        weight_val = safe_float(data.iloc[k, wt_col]) if wt_col is not None else 0
+
+        # Skip removed/exited stocks — they have Status="Removed" and Weight=0
+        if status_val == 'Removed' or weight_val == 0:
+            continue
+
         stock_data = {
             'symbol': sym,
             'clean_symbol': clean_sym,
             'sector': sector,
-            'weight': safe_float(data.iloc[k, wt_col]) if wt_col is not None else 0,
+            'weight': weight_val,
             'beta': safe_float(data.iloc[k, beta_col]) if beta_col is not None else 0,
             'erb': safe_float(data.iloc[k, erb_col]) if erb_col is not None else 0,
             'action': str(data.iloc[k, action_col]) if action_col is not None else '',
-            'status': str(data.iloc[k, status_col]) if status_col is not None else ''
+            'status': status_val
         }
         stocks.append(stock_data)
     return stocks
