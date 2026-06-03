@@ -446,7 +446,7 @@ for port_month in all_port_months:
     weights = w / w.sum()
 
     for s, w in zip(selected, weights): s['weight'] = w
-    selected = [s for s in selected if s['weight'] > 0]
+    selected = [s for s in selected if s['weight'] > 0 and int(np.floor((INITIAL_CAPITAL * s['weight']) / s['buy_px'])) > 0]
 
     layers_current = {'Base': {s['ticker'] for s in selected}}
     st_kept, ema_kept, combo_kept = [], [], []
@@ -550,6 +550,33 @@ for port_month in all_port_months:
                 'Status': 'Added' if ticker not in prev_layer_stocks['Base'] else 'Remained',
                 'Buy_Px': buy_px, 'Sell_Px': sell_px, 'Return': (sell_px/buy_px)-1 if buy_px > 0 else 0.0
             })
+        elif ticker in prev_layer_stocks['Base']:
+            # This stock was held last month but is now fully liquidated (weight is 0)
+            prev_qty = 0
+            prev_month_str = (port_month - 1).strftime('%Y-%m')
+            prev_audit = [a for a in portfolio_audit_log if a['Month'] == prev_month_str and a['Symbol'] == ticker]
+            if prev_audit:
+                prev_qty = prev_audit[0].get('Qty', 0)
+                prev_beta = prev_audit[0].get('Beta', 0.0)
+            else:
+                prev_beta = 0.0
+            
+            if prev_qty > 0:
+                curr_qty = 0
+                delta_qty = -prev_qty
+                action = f"SELL {int(prev_qty)}"
+                
+                portfolio_audit_log.append({
+                    'Month': port_month.strftime('%Y-%m'), 
+                    'Analysis_Month': port_month.strftime('%Y-%m'),
+                    'Trade_Month': trade_month.strftime('%Y-%m'),
+                    'Symbol': ticker, 'Beta': prev_beta, 
+                    'ERB': 0.0, 'Weight': 0.0, 
+                    'ST_Wt': 0.0, 'EMA_Wt': 0.0, 'COMBO_Wt': 0.0, 'ULTRA_Wt': 0.0,
+                    'Qty': curr_qty, 'Prev_Qty': prev_qty, 'Delta_Qty': delta_qty, 'Action': action,
+                    'Status': 'Removed',
+                    'Buy_Px': buy_px, 'Sell_Px': buy_px, 'Return': 0.0
+                })
 
     # Transaction Costs (Quantity-Based Turnover)
     for l in layers_current.keys():
