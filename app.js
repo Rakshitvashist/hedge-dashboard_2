@@ -803,29 +803,36 @@ function renderExecTable(d) {
   const el = document.getElementById('execTable');
   if (!el) return;
   const summary = d.exec_summary;
-  const layers7 = ['Base','ST','EMA','COMBO','ULTRA','COMBO_HEDGE','ULTRA_HEDGE'];
+  const layers = ['Base','ST','EMA','COMBO','ULTRA','COMBO_HEDGE','ULTRA_HEDGE','Bench'];
   const metrics = Object.keys(summary).filter(m => m !== 'Sharpe' && m !== 'Sortino');
 
   el.innerHTML = `
     <thead>
       <tr>
         <th>Metric</th>
-        ${layers7.map(l => `<th><span class="ltag ${LAYERS[l].cls}" style="font-size:.6rem">${LAYERS[l].label}</span></th>`).join('')}
+        ${layers.map(l => `<th><span class="ltag ${LAYERS[l].cls}" style="font-size:.6rem">${LAYERS[l].label}</span></th>`).join('')}
       </tr>
     </thead>
     <tbody>
       ${metrics.map(metric => `
         <tr>
           <td class="text-muted" style="font-size:.72rem;font-weight:600">${metric}</td>
-          ${layers7.map(l => {
+          ${layers.map(l => {
             const v = summary[metric]?.[l];
             if (v == null) return '<td>—</td>';
+            
+            // Check if metric is not applicable for benchmark
+            const isBench = l === 'Bench';
+            if (isBench && (metric === 'Alpha vs Bench' || metric === 'Avg Ex-Ante Sharpe' || metric === 'Info Ratio')) {
+              return '<td class="mono text-muted" style="font-size:.75rem">—</td>';
+            }
+            
             const pct = ['CAGR','XIRR','Volatility','Alpha vs Bench','Max Drawdown',
                          'VaR 95%','VaR 99%','CVaR 95%','CVaR 99%','Downside Dev',
                          'Best Month','Worst Month','Avg Gain','Avg Loss',
                          'Rolling 1Y','Rolling 3Y','Abs Return'].includes(metric);
             const display = pct ? (v*100).toFixed(2)+'%' : v.toFixed(4);
-            const col = v >= 0 ? 'text-emerald' : 'text-rose';
+            const col = isBench && metric === 'Alpha vs Bench' ? 'text-muted' : (v >= 0 ? 'text-emerald' : 'text-rose');
             return `<td class="mono ${col}" style="font-size:.75rem">${display}</td>`;
           }).join('')}
         </tr>`).join('')}

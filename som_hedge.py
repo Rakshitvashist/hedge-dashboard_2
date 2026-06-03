@@ -677,8 +677,8 @@ def style_cell(cell, fill=None, font=None, border=BRD, align="center"):
 # 1. Dashboard
 ws_dash = wb.active
 ws_dash.title = "Executive_Dashboard"
-headers = ["Metric", "Base SIM", "ST Filter", "EMA Filter", "COMBO Filter", "ULTRA Layer", "COMBO+Hedge", "ULTRA Defense"]
-layers = ['Base', 'ST', 'EMA', 'COMBO', 'ULTRA', 'COMBO_HEDGE', 'ULTRA_HEDGE']
+headers = ["Metric", "Base SIM", "ST Filter", "EMA Filter", "COMBO Filter", "ULTRA Layer", "COMBO+Hedge", "ULTRA Defense", "Benchmark"]
+layers = ['Base', 'ST', 'EMA', 'COMBO', 'ULTRA', 'COMBO_HEDGE', 'ULTRA_HEDGE', 'Bench']
 
 for j, h in enumerate(headers, 1):
     c = ws_dash.cell(1, j, h); style_cell(c, HDR_FILL, WHITE_FONT)
@@ -689,7 +689,7 @@ avg_rf_period = (rf_monthly[rf_monthly.index.isin(all_port_months)].mean() * 12)
 metrics_results = {l: get_advanced_metrics(df_sum[l], df_sum['Bench'], rf_annual=avg_rf_period) for l in layers}
 avg_ex_ante = df_sum['Ex_Ante_Sharpe'].mean()
 for l in layers:
-    metrics_results[l]['Avg Ex-Ante Sharpe'] = avg_ex_ante
+    metrics_results[l]['Avg Ex-Ante Sharpe'] = avg_ex_ante if l != 'Bench' else 0.0
 
 metric_names = list(metrics_results['Base'].keys())
 

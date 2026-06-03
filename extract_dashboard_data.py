@@ -357,7 +357,7 @@ for universe in ['nifty50', 'nifty500']:
     print(f"\n[*] Processing {fname}...")
     xl = pd.ExcelFile(fname)
     
-    # 1. Executive Summary (all 7 layers)
+    # 1. Executive Summary (all 7 layers + Benchmark)
     df_exec = pd.read_excel(xl, sheet_name='Executive_Dashboard')
     exec_data = {}
     for _, row in df_exec.iterrows():
@@ -370,6 +370,7 @@ for universe in ['nifty50', 'nifty500']:
             'ULTRA': safe_float(row.get('ULTRA Layer', 0)),
             'COMBO_HEDGE': safe_float(row.get('COMBO+Hedge', 0)),
             'ULTRA_HEDGE': safe_float(row.get('ULTRA Defense', 0)),
+            'Bench': safe_float(row.get('Benchmark', 0)),
         }
     
     # 2. Monthly Summary (all returns for all layers)

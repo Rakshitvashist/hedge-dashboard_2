@@ -8,7 +8,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.159388,
         "ULTRA": 0.159388,
         "COMBO_HEDGE": 0.112351,
-        "ULTRA_HEDGE": 0.112351
+        "ULTRA_HEDGE": 0.112351,
+        "Bench": 0.093915
       },
       "XIRR": {
         "Base": 0.146816,
@@ -17,7 +18,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.159388,
         "ULTRA": 0.159388,
         "COMBO_HEDGE": 0.112351,
-        "ULTRA_HEDGE": 0.112351
+        "ULTRA_HEDGE": 0.112351,
+        "Bench": 0.093915
       },
       "Abs Return": {
         "Base": 1.029481,
@@ -26,7 +28,8 @@ const DASHBOARD_DATA = {
         "COMBO": 1.147086,
         "ULTRA": 1.147086,
         "COMBO_HEDGE": 0.733466,
-        "ULTRA_HEDGE": 0.733466
+        "ULTRA_HEDGE": 0.733466,
+        "Bench": 0.590065
       },
       "Alpha vs Bench": {
         "Base": 0.052901,
@@ -35,7 +38,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.065473,
         "ULTRA": 0.065473,
         "COMBO_HEDGE": 0.018436,
-        "ULTRA_HEDGE": 0.018436
+        "ULTRA_HEDGE": 0.018436,
+        "Bench": 0.0
       },
       "Volatility": {
         "Base": 0.187149,
@@ -44,7 +48,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.161252,
         "ULTRA": 0.161252,
         "COMBO_HEDGE": 0.135591,
-        "ULTRA_HEDGE": 0.135591
+        "ULTRA_HEDGE": 0.135591,
+        "Bench": 0.136018
       },
       "Downside Dev": {
         "Base": 0.190291,
@@ -53,7 +58,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.159433,
         "ULTRA": 0.159433,
         "COMBO_HEDGE": 0.118268,
-        "ULTRA_HEDGE": 0.118268
+        "ULTRA_HEDGE": 0.118268,
+        "Bench": 0.123665
       },
       "Sharpe": {
         "Base": 0.464172,
@@ -62,7 +68,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.616681,
         "ULTRA": 0.616681,
         "COMBO_HEDGE": 0.386481,
-        "ULTRA_HEDGE": 0.386481
+        "ULTRA_HEDGE": 0.386481,
+        "Bench": 0.249729
       },
       "Sortino": {
         "Base": 0.456508,
@@ -71,7 +78,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.623716,
         "ULTRA": 0.623716,
         "COMBO_HEDGE": 0.44309,
-        "ULTRA_HEDGE": 0.44309
+        "ULTRA_HEDGE": 0.44309,
+        "Bench": 0.274675
       },
       "Calmar": {
         "Base": 0.757105,
@@ -80,7 +88,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.987459,
         "ULTRA": 0.987459,
         "COMBO_HEDGE": 0.788926,
-        "ULTRA_HEDGE": 0.788926
+        "ULTRA_HEDGE": 0.788926,
+        "Bench": 0.635623
       },
       "Max Drawdown": {
         "Base": -0.193918,
@@ -89,7 +98,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.161413,
         "ULTRA": -0.161413,
         "COMBO_HEDGE": -0.142409,
-        "ULTRA_HEDGE": -0.142409
+        "ULTRA_HEDGE": -0.142409,
+        "Bench": -0.147752
       },
       "DD Duration (M)": {
         "Base": 12.0,
@@ -98,7 +108,8 @@ const DASHBOARD_DATA = {
         "COMBO": 10.0,
         "ULTRA": 10.0,
         "COMBO_HEDGE": 21.0,
-        "ULTRA_HEDGE": 21.0
+        "ULTRA_HEDGE": 21.0,
+        "Bench": 13.0
       },
       "VaR 95%": {
         "Base": -0.083366,
@@ -107,7 +118,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.060033,
         "ULTRA": -0.060033,
         "COMBO_HEDGE": -0.044835,
-        "ULTRA_HEDGE": -0.044835
+        "ULTRA_HEDGE": -0.044835,
+        "Bench": -0.04802
       },
       "VaR 99%": {
         "Base": -0.112613,
@@ -116,7 +128,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.088429,
         "ULTRA": -0.088429,
         "COMBO_HEDGE": -0.08085,
-        "ULTRA_HEDGE": -0.08085
+        "ULTRA_HEDGE": -0.08085,
+        "Bench": -0.082045
       },
       "CVaR 95%": {
         "Base": -0.10284,
@@ -125,7 +138,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.080625,
         "ULTRA": -0.080625,
         "COMBO_HEDGE": -0.064764,
-        "ULTRA_HEDGE": -0.064764
+        "ULTRA_HEDGE": -0.064764,
+        "Bench": -0.07066
       },
       "CVaR 99%": {
         "Base": -0.140238,
@@ -134,7 +148,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.091268,
         "ULTRA": -0.091268,
         "COMBO_HEDGE": -0.084248,
-        "ULTRA_HEDGE": -0.084248
+        "ULTRA_HEDGE": -0.084248,
+        "Bench": -0.113082
       },
       "Info Ratio": {
         "Base": 0.410708,
@@ -143,7 +158,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.67049,
         "ULTRA": 0.67049,
         "COMBO_HEDGE": 0.153231,
-        "ULTRA_HEDGE": 0.153231
+        "ULTRA_HEDGE": 0.153231,
+        "Bench": 0.0
       },
       "Win Rate": {
         "Base": 0.629032,
@@ -152,7 +168,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.66129,
         "ULTRA": 0.66129,
         "COMBO_HEDGE": 0.612903,
-        "ULTRA_HEDGE": 0.612903
+        "ULTRA_HEDGE": 0.612903,
+        "Bench": 0.564516
       },
       "Profit Factor": {
         "Base": 1.803743,
@@ -161,7 +178,8 @@ const DASHBOARD_DATA = {
         "COMBO": 2.071366,
         "ULTRA": 2.071366,
         "COMBO_HEDGE": 1.950349,
-        "ULTRA_HEDGE": 1.950349
+        "ULTRA_HEDGE": 1.950349,
+        "Bench": 1.710309
       },
       "Expectancy": {
         "Base": 0.012924,
@@ -170,7 +188,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.013461,
         "ULTRA": 0.013461,
         "COMBO_HEDGE": 0.009656,
-        "ULTRA_HEDGE": 0.009656
+        "ULTRA_HEDGE": 0.009656,
+        "Bench": 0.008266
       },
       "Avg Gain": {
         "Base": 0.046107,
@@ -179,7 +198,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.039357,
         "ULTRA": 0.039357,
         "COMBO_HEDGE": 0.032333,
-        "ULTRA_HEDGE": 0.032333
+        "ULTRA_HEDGE": 0.032333,
+        "Bench": 0.035257
       },
       "Avg Loss": {
         "Base": -0.043344,
@@ -188,7 +208,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.037096,
         "ULTRA": -0.037096,
         "COMBO_HEDGE": -0.026249,
-        "ULTRA_HEDGE": -0.026249
+        "ULTRA_HEDGE": -0.026249,
+        "Bench": -0.026722
       },
       "Rolling 1Y": {
         "Base": 0.186715,
@@ -197,7 +218,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.178228,
         "ULTRA": 0.178228,
         "COMBO_HEDGE": 0.117415,
-        "ULTRA_HEDGE": 0.117415
+        "ULTRA_HEDGE": 0.117415,
+        "Bench": 0.101153
       },
       "Rolling 3Y": {
         "Base": 0.868735,
@@ -206,7 +228,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.781979,
         "ULTRA": 0.781979,
         "COMBO_HEDGE": 0.495473,
-        "ULTRA_HEDGE": 0.495473
+        "ULTRA_HEDGE": 0.495473,
+        "Bench": 0.416939
       },
       "Best Month": {
         "Base": 0.110896,
@@ -215,7 +238,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.110981,
         "ULTRA": 0.110981,
         "COMBO_HEDGE": 0.110981,
-        "ULTRA_HEDGE": 0.110981
+        "ULTRA_HEDGE": 0.110981,
+        "Bench": 0.087324
       },
       "Worst Month": {
         "Base": -0.140238,
@@ -224,7 +248,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.091268,
         "ULTRA": -0.091268,
         "COMBO_HEDGE": -0.084248,
-        "ULTRA_HEDGE": -0.084248
+        "ULTRA_HEDGE": -0.084248,
+        "Bench": -0.113082
       },
       "Avg Ex-Ante Sharpe": {
         "Base": 2.180073,
@@ -233,7 +258,8 @@ const DASHBOARD_DATA = {
         "COMBO": 2.180073,
         "ULTRA": 2.180073,
         "COMBO_HEDGE": 2.180073,
-        "ULTRA_HEDGE": 2.180073
+        "ULTRA_HEDGE": 2.180073,
+        "Bench": 0.0
       }
     },
     "avg_ex_ante_sr": 2.18,
@@ -3855,6 +3881,21 @@ const DASHBOARD_DATA = {
     ],
     "current_portfolio": [
       {
+        "symbol": "BHARTIARTL_1d_max",
+        "clean_symbol": "BHARTIARTL",
+        "sector": "Telecommunication",
+        "weight": 0.1,
+        "beta": 0.866577,
+        "erb": 0.247681,
+        "action": "BUY 17",
+        "status": "Remained",
+        "ltp": 1814.199951,
+        "change_pct": 0.2,
+        "mtd_change_pct": -0.81,
+        "prev_close": 1810.599976,
+        "date": "2026-06-02 00:00:00"
+      },
+      {
         "symbol": "NTPC_1d_max",
         "clean_symbol": "NTPC",
         "sector": "Power",
@@ -3900,33 +3941,18 @@ const DASHBOARD_DATA = {
         "date": "2026-06-02 00:00:00"
       },
       {
-        "symbol": "BHARTIARTL_1d_max",
-        "clean_symbol": "BHARTIARTL",
-        "sector": "Telecommunication",
+        "symbol": "MAXHEALTH_1d_max",
+        "clean_symbol": "MAXHEALTH",
+        "sector": "Healthcare",
         "weight": 0.1,
-        "beta": 0.866577,
-        "erb": 0.247681,
-        "action": "BUY 17",
+        "beta": 0.988737,
+        "erb": 0.293639,
+        "action": "BUY 24",
         "status": "Remained",
-        "ltp": 1814.199951,
-        "change_pct": 0.2,
-        "mtd_change_pct": -0.81,
-        "prev_close": 1810.599976,
-        "date": "2026-06-02 00:00:00"
-      },
-      {
-        "symbol": "M&M_1d_max",
-        "clean_symbol": "M&M",
-        "sector": "Automobile and Auto Components",
-        "weight": 0.1,
-        "beta": 0.955895,
-        "erb": 0.261202,
-        "action": "BUY 5",
-        "status": "Remained",
-        "ltp": 2998.300049,
-        "change_pct": 0.95,
-        "mtd_change_pct": -1.55,
-        "prev_close": 2970.199951,
+        "ltp": 948.700012,
+        "change_pct": 1.09,
+        "mtd_change_pct": -1.7,
+        "prev_close": 938.450012,
         "date": "2026-06-02 00:00:00"
       },
       {
@@ -3945,18 +3971,18 @@ const DASHBOARD_DATA = {
         "date": "2026-06-02 00:00:00"
       },
       {
-        "symbol": "MAXHEALTH_1d_max",
-        "clean_symbol": "MAXHEALTH",
-        "sector": "Healthcare",
+        "symbol": "M&M_1d_max",
+        "clean_symbol": "M&M",
+        "sector": "Automobile and Auto Components",
         "weight": 0.1,
-        "beta": 0.988737,
-        "erb": 0.293639,
-        "action": "BUY 24",
+        "beta": 0.955895,
+        "erb": 0.261202,
+        "action": "BUY 5",
         "status": "Remained",
-        "ltp": 948.700012,
-        "change_pct": 1.09,
-        "mtd_change_pct": -1.7,
-        "prev_close": 938.450012,
+        "ltp": 2998.300049,
+        "change_pct": 0.95,
+        "mtd_change_pct": -1.55,
+        "prev_close": 2970.199951,
         "date": "2026-06-02 00:00:00"
       },
       {
@@ -4038,6 +4064,15 @@ const DASHBOARD_DATA = {
     "exec_history": [
       {
         "month": "2026-03",
+        "symbol": "SUNPHARMA_1d_max",
+        "action": "BUY 534",
+        "qty": 567,
+        "price": 1762.099976,
+        "return": 0.026219,
+        "sector": "Healthcare"
+      },
+      {
+        "month": "2026-03",
         "symbol": "MARUTI_1d_max",
         "action": "SELL 52",
         "qty": 0,
@@ -4047,12 +4082,21 @@ const DASHBOARD_DATA = {
       },
       {
         "month": "2026-03",
-        "symbol": "APOLLOHOSP_1d_max",
-        "action": "BUY 49",
-        "qty": 64,
-        "price": 7549.0,
-        "return": 0.011591,
-        "sector": "Healthcare"
+        "symbol": "BHARTIARTL_1d_max",
+        "action": "BUY 100",
+        "qty": 552,
+        "price": 1811.0,
+        "return": 0.041855,
+        "sector": "Telecommunication"
+      },
+      {
+        "month": "2026-03",
+        "symbol": "TATASTEEL_1d_max",
+        "action": "SELL 420",
+        "qty": 0,
+        "price": 200.0,
+        "return": 0.0,
+        "sector": "Metals & Mining"
       },
       {
         "month": "2026-03",
@@ -4073,24 +4117,6 @@ const DASHBOARD_DATA = {
         "sector": "Capital Goods"
       },
       {
-        "month": "2026-03",
-        "symbol": "COALINDIA_1d_max",
-        "action": "BUY 74",
-        "qty": 2155,
-        "price": 464.0,
-        "return": 0.037608,
-        "sector": "Oil Gas & Consumable Fuels"
-      },
-      {
-        "month": "2026-03",
-        "symbol": "EICHERMOT_1d_max",
-        "action": "SELL 114",
-        "qty": 0,
-        "price": 6787.5,
-        "return": 0.0,
-        "sector": "Automobile and Auto Components"
-      },
-      {
         "month": "2026-04",
         "symbol": "ONGC_1d_max",
         "action": "SELL 110",
@@ -4101,12 +4127,21 @@ const DASHBOARD_DATA = {
       },
       {
         "month": "2026-04",
-        "symbol": "SUNPHARMA_1d_max",
-        "action": "SELL 112",
-        "qty": 455,
-        "price": 1808.300049,
-        "return": -0.005032,
-        "sector": "Healthcare"
+        "symbol": "M&M_1d_max",
+        "action": "SELL 2",
+        "qty": 322,
+        "price": 3097.5,
+        "return": -0.016755,
+        "sector": "Automobile and Auto Components"
+      },
+      {
+        "month": "2026-04",
+        "symbol": "SHRIRAMFIN_1d_max",
+        "action": "BUY 505",
+        "qty": 1066,
+        "price": 937.349976,
+        "return": 0.010455,
+        "sector": "Financial Services"
       },
       {
         "month": "2026-04",
@@ -4128,30 +4163,12 @@ const DASHBOARD_DATA = {
       },
       {
         "month": "2026-04",
-        "symbol": "M&M_1d_max",
-        "action": "SELL 2",
-        "qty": 322,
-        "price": 3097.5,
-        "return": -0.016755,
+        "symbol": "EICHERMOT_1d_max",
+        "action": "BUY 24",
+        "qty": 24,
+        "price": 7109.0,
+        "return": 0.009565,
         "sector": "Automobile and Auto Components"
-      },
-      {
-        "month": "2026-04",
-        "symbol": "BHARTIARTL_1d_max",
-        "action": "SELL 23",
-        "qty": 529,
-        "price": 1886.800049,
-        "return": -0.030634,
-        "sector": "Telecommunication"
-      },
-      {
-        "month": "2026-04",
-        "symbol": "SHRIRAMFIN_1d_max",
-        "action": "BUY 505",
-        "qty": 1066,
-        "price": 937.349976,
-        "return": 0.010455,
-        "sector": "Financial Services"
       },
       {
         "month": "2026-04",
@@ -4161,6 +4178,33 @@ const DASHBOARD_DATA = {
         "price": 7636.5,
         "return": 0.0,
         "sector": "Healthcare"
+      },
+      {
+        "month": "2026-04",
+        "symbol": "COALINDIA_1d_max",
+        "action": "SELL 78",
+        "qty": 2077,
+        "price": 481.450012,
+        "return": -0.048915,
+        "sector": "Oil Gas & Consumable Fuels"
+      },
+      {
+        "month": "2026-04",
+        "symbol": "SUNPHARMA_1d_max",
+        "action": "SELL 112",
+        "qty": 455,
+        "price": 1808.300049,
+        "return": -0.005032,
+        "sector": "Healthcare"
+      },
+      {
+        "month": "2026-04",
+        "symbol": "BHARTIARTL_1d_max",
+        "action": "SELL 23",
+        "qty": 529,
+        "price": 1886.800049,
+        "return": -0.030634,
+        "sector": "Telecommunication"
       },
       {
         "month": "2026-04",
@@ -4181,24 +4225,6 @@ const DASHBOARD_DATA = {
         "sector": "Capital Goods"
       },
       {
-        "month": "2026-04",
-        "symbol": "COALINDIA_1d_max",
-        "action": "SELL 78",
-        "qty": 2077,
-        "price": 481.450012,
-        "return": -0.048915,
-        "sector": "Oil Gas & Consumable Fuels"
-      },
-      {
-        "month": "2026-04",
-        "symbol": "EICHERMOT_1d_max",
-        "action": "BUY 24",
-        "qty": 24,
-        "price": 7109.0,
-        "return": 0.009565,
-        "sector": "Automobile and Auto Components"
-      },
-      {
         "month": "2026-05",
         "symbol": "ONGC_1d_max",
         "action": "BUY 413",
@@ -4209,12 +4235,21 @@ const DASHBOARD_DATA = {
       },
       {
         "month": "2026-05",
-        "symbol": "SUNPHARMA_1d_max",
-        "action": "BUY 4",
-        "qty": 459,
-        "price": 1812.0,
-        "return": -0.012196,
-        "sector": "Healthcare"
+        "symbol": "M&M_1d_max",
+        "action": "BUY 5",
+        "qty": 327,
+        "price": 3050.0,
+        "return": -0.016951,
+        "sector": "Automobile and Auto Components"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "SHRIRAMFIN_1d_max",
+        "action": "SELL 14",
+        "qty": 1052,
+        "price": 950.049988,
+        "return": -0.040366,
+        "sector": "Financial Services"
       },
       {
         "month": "2026-05",
@@ -4236,30 +4271,12 @@ const DASHBOARD_DATA = {
       },
       {
         "month": "2026-05",
-        "symbol": "M&M_1d_max",
+        "symbol": "EICHERMOT_1d_max",
         "action": "BUY 5",
-        "qty": 327,
-        "price": 3050.0,
-        "return": -0.016951,
+        "qty": 29,
+        "price": 7177.0,
+        "return": -0.004946,
         "sector": "Automobile and Auto Components"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "BHARTIARTL_1d_max",
-        "action": "BUY 17",
-        "qty": 546,
-        "price": 1830.0,
-        "return": -0.008634,
-        "sector": "Telecommunication"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "SHRIRAMFIN_1d_max",
-        "action": "SELL 14",
-        "qty": 1052,
-        "price": 950.049988,
-        "return": -0.040366,
-        "sector": "Financial Services"
       },
       {
         "month": "2026-05",
@@ -4269,6 +4286,33 @@ const DASHBOARD_DATA = {
         "price": 8221.5,
         "return": -0.016055,
         "sector": "Healthcare"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "COALINDIA_1d_max",
+        "action": "BUY 113",
+        "qty": 2190,
+        "price": 456.549988,
+        "return": 0.034169,
+        "sector": "Oil Gas & Consumable Fuels"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "SUNPHARMA_1d_max",
+        "action": "BUY 4",
+        "qty": 459,
+        "price": 1812.0,
+        "return": -0.012196,
+        "sector": "Healthcare"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "BHARTIARTL_1d_max",
+        "action": "BUY 17",
+        "qty": 546,
+        "price": 1830.0,
+        "return": -0.008634,
+        "sector": "Telecommunication"
       },
       {
         "month": "2026-05",
@@ -4287,35 +4331,17 @@ const DASHBOARD_DATA = {
         "price": 412.350006,
         "return": -0.010913,
         "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "COALINDIA_1d_max",
-        "action": "BUY 113",
-        "qty": 2190,
-        "price": 456.549988,
-        "return": 0.034169,
-        "sector": "Oil Gas & Consumable Fuels"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "EICHERMOT_1d_max",
-        "action": "BUY 5",
-        "qty": 29,
-        "price": 7177.0,
-        "return": -0.004946,
-        "sector": "Automobile and Auto Components"
       }
     ],
     "stock_correlation": {
       "symbols": [
+        "BHARTIARTL",
         "NTPC",
         "BEL",
         "COALINDIA",
-        "BHARTIARTL",
-        "M&M",
-        "SHRIRAMFIN",
         "MAXHEALTH",
+        "SHRIRAMFIN",
+        "M&M",
         "ONGC",
         "SUNPHARMA",
         "APOLLOHOSP",
@@ -4325,54 +4351,12 @@ const DASHBOARD_DATA = {
       "matrix": [
         [
           1.0,
-          0.221,
-          0.399,
           0.128,
-          0.244,
-          0.323,
-          0.281,
-          0.221,
-          0.242,
-          0.323,
-          0.514,
-          0.244
-        ],
-        [
-          0.221,
-          1.0,
-          0.21,
           0.202,
-          0.374,
-          0.493,
-          0.158,
-          0.212,
-          0.075,
-          0.295,
+          0.037,
           0.189,
-          0.344
-        ],
-        [
-          0.399,
-          0.21,
-          1.0,
-          0.037,
-          -0.112,
-          0.056,
-          0.022,
-          0.331,
-          0.17,
-          -0.016,
-          0.272,
-          -0.156
-        ],
-        [
-          0.128,
-          0.202,
-          0.037,
-          1.0,
-          0.365,
           0.321,
-          0.189,
+          0.365,
           0.028,
           0.265,
           0.239,
@@ -4380,41 +4364,55 @@ const DASHBOARD_DATA = {
           0.237
         ],
         [
-          0.244,
-          0.374,
-          -0.112,
-          0.365,
+          0.128,
           1.0,
-          0.664,
-          0.32,
-          -0.054,
-          0.22,
-          0.386,
-          0.259,
-          0.651
-        ],
-        [
+          0.221,
+          0.399,
+          0.281,
           0.323,
-          0.493,
-          0.056,
-          0.321,
-          0.664,
-          1.0,
-          0.246,
-          -0.08,
-          0.092,
-          0.382,
-          0.185,
-          0.652
+          0.244,
+          0.221,
+          0.242,
+          0.323,
+          0.514,
+          0.244
         ],
         [
+          0.202,
+          0.221,
+          1.0,
+          0.21,
+          0.158,
+          0.493,
+          0.374,
+          0.212,
+          0.075,
+          0.295,
+          0.189,
+          0.344
+        ],
+        [
+          0.037,
+          0.399,
+          0.21,
+          1.0,
+          0.022,
+          0.056,
+          -0.112,
+          0.331,
+          0.17,
+          -0.016,
+          0.272,
+          -0.156
+        ],
+        [
+          0.189,
           0.281,
           0.158,
           0.022,
-          0.189,
-          0.32,
-          0.246,
           1.0,
+          0.246,
+          0.32,
           0.122,
           0.409,
           0.485,
@@ -4422,13 +4420,41 @@ const DASHBOARD_DATA = {
           0.315
         ],
         [
+          0.321,
+          0.323,
+          0.493,
+          0.056,
+          0.246,
+          1.0,
+          0.664,
+          -0.08,
+          0.092,
+          0.382,
+          0.185,
+          0.652
+        ],
+        [
+          0.365,
+          0.244,
+          0.374,
+          -0.112,
+          0.32,
+          0.664,
+          1.0,
+          -0.054,
+          0.22,
+          0.386,
+          0.259,
+          0.651
+        ],
+        [
+          0.028,
           0.221,
           0.212,
           0.331,
-          0.028,
-          -0.054,
-          -0.08,
           0.122,
+          -0.08,
+          -0.054,
           1.0,
           -0.038,
           -0.0,
@@ -4436,13 +4462,13 @@ const DASHBOARD_DATA = {
           -0.066
         ],
         [
+          0.265,
           0.242,
           0.075,
           0.17,
-          0.265,
-          0.22,
-          0.092,
           0.409,
+          0.092,
+          0.22,
           -0.038,
           1.0,
           0.324,
@@ -4450,13 +4476,13 @@ const DASHBOARD_DATA = {
           0.165
         ],
         [
+          0.239,
           0.323,
           0.295,
           -0.016,
-          0.239,
-          0.386,
-          0.382,
           0.485,
+          0.382,
+          0.386,
           -0.0,
           0.324,
           1.0,
@@ -4464,13 +4490,13 @@ const DASHBOARD_DATA = {
           0.434
         ],
         [
+          0.108,
           0.514,
           0.189,
           0.272,
-          0.108,
-          0.259,
-          0.185,
           0.37,
+          0.185,
+          0.259,
           0.05,
           0.321,
           0.2,
@@ -4478,13 +4504,13 @@ const DASHBOARD_DATA = {
           0.163
         ],
         [
+          0.237,
           0.244,
           0.344,
           -0.156,
-          0.237,
-          0.651,
-          0.652,
           0.315,
+          0.652,
+          0.651,
           -0.066,
           0.165,
           0.434,
@@ -4513,7 +4539,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.168227,
         "ULTRA": 0.168227,
         "COMBO_HEDGE": 0.131062,
-        "ULTRA_HEDGE": 0.131062
+        "ULTRA_HEDGE": 0.131062,
+        "Bench": 0.121315
       },
       "XIRR": {
         "Base": 0.247618,
@@ -4522,7 +4549,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.168227,
         "ULTRA": 0.168227,
         "COMBO_HEDGE": 0.131062,
-        "ULTRA_HEDGE": 0.131062
+        "ULTRA_HEDGE": 0.131062,
+        "Bench": 0.121315
       },
       "Abs Return": {
         "Base": 2.136331,
@@ -4531,7 +4559,8 @@ const DASHBOARD_DATA = {
         "COMBO": 1.233014,
         "ULTRA": 1.233014,
         "COMBO_HEDGE": 0.889498,
-        "ULTRA_HEDGE": 0.889498
+        "ULTRA_HEDGE": 0.889498,
+        "Bench": 0.806864
       },
       "Alpha vs Bench": {
         "Base": 0.126303,
@@ -4540,7 +4569,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.046913,
         "ULTRA": 0.046913,
         "COMBO_HEDGE": 0.009747,
-        "ULTRA_HEDGE": 0.009747
+        "ULTRA_HEDGE": 0.009747,
+        "Bench": 0.0
       },
       "Volatility": {
         "Base": 0.201912,
@@ -4549,7 +4579,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.160574,
         "ULTRA": 0.160574,
         "COMBO_HEDGE": 0.147055,
-        "ULTRA_HEDGE": 0.147055
+        "ULTRA_HEDGE": 0.147055,
+        "Bench": 0.146635
       },
       "Downside Dev": {
         "Base": 0.182135,
@@ -4558,7 +4589,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.166733,
         "ULTRA": 0.166733,
         "COMBO_HEDGE": 0.137428,
-        "ULTRA_HEDGE": 0.137428
+        "ULTRA_HEDGE": 0.137428,
+        "Bench": 0.140384
       },
       "Sharpe": {
         "Base": 0.92947,
@@ -4567,7 +4599,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.674331,
         "ULTRA": 0.674331,
         "COMBO_HEDGE": 0.483592,
-        "ULTRA_HEDGE": 0.483592
+        "ULTRA_HEDGE": 0.483592,
+        "Bench": 0.418504
       },
       "Sortino": {
         "Base": 1.030391,
@@ -4576,7 +4609,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.649422,
         "ULTRA": 0.649422,
         "COMBO_HEDGE": 0.517471,
-        "ULTRA_HEDGE": 0.517471
+        "ULTRA_HEDGE": 0.517471,
+        "Bench": 0.437139
       },
       "Calmar": {
         "Base": 1.078692,
@@ -4585,7 +4619,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.897506,
         "ULTRA": 0.897506,
         "COMBO_HEDGE": 0.666707,
-        "ULTRA_HEDGE": 0.666707
+        "ULTRA_HEDGE": 0.666707,
+        "Bench": 0.673945
       },
       "Max Drawdown": {
         "Base": -0.229554,
@@ -4594,7 +4629,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.187439,
         "ULTRA": -0.187439,
         "COMBO_HEDGE": -0.196581,
-        "ULTRA_HEDGE": -0.196581
+        "ULTRA_HEDGE": -0.196581,
+        "Bench": -0.180007
       },
       "DD Duration (M)": {
         "Base": 21.0,
@@ -4603,7 +4639,8 @@ const DASHBOARD_DATA = {
         "COMBO": 21.0,
         "ULTRA": 21.0,
         "COMBO_HEDGE": 21.0,
-        "ULTRA_HEDGE": 21.0
+        "ULTRA_HEDGE": 21.0,
+        "Bench": 21.0
       },
       "VaR 95%": {
         "Base": -0.072914,
@@ -4612,7 +4649,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.063798,
         "ULTRA": -0.063798,
         "COMBO_HEDGE": -0.048217,
-        "ULTRA_HEDGE": -0.048217
+        "ULTRA_HEDGE": -0.048217,
+        "Bench": -0.051499
       },
       "VaR 99%": {
         "Base": -0.110039,
@@ -4621,7 +4659,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.093182,
         "ULTRA": -0.093182,
         "COMBO_HEDGE": -0.091054,
-        "ULTRA_HEDGE": -0.091054
+        "ULTRA_HEDGE": -0.091054,
+        "Bench": -0.092474
       },
       "CVaR 95%": {
         "Base": -0.095872,
@@ -4630,7 +4669,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.082432,
         "ULTRA": -0.082432,
         "COMBO_HEDGE": -0.074446,
-        "ULTRA_HEDGE": -0.074446
+        "ULTRA_HEDGE": -0.074446,
+        "Bench": -0.077174
       },
       "CVaR 99%": {
         "Base": -0.134736,
@@ -4639,7 +4679,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.121455,
         "ULTRA": -0.121455,
         "COMBO_HEDGE": -0.118959,
-        "ULTRA_HEDGE": -0.118959
+        "ULTRA_HEDGE": -0.118959,
+        "Bench": -0.113904
       },
       "Info Ratio": {
         "Base": 0.830574,
@@ -4648,7 +4689,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.405093,
         "ULTRA": 0.405093,
         "COMBO_HEDGE": 0.0689,
-        "ULTRA_HEDGE": 0.0689
+        "ULTRA_HEDGE": 0.0689,
+        "Bench": 0.0
       },
       "Win Rate": {
         "Base": 0.629032,
@@ -4657,7 +4699,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.677419,
         "ULTRA": 0.677419,
         "COMBO_HEDGE": 0.612903,
-        "ULTRA_HEDGE": 0.612903
+        "ULTRA_HEDGE": 0.612903,
+        "Bench": 0.612903
       },
       "Profit Factor": {
         "Base": 2.343237,
@@ -4666,7 +4709,8 @@ const DASHBOARD_DATA = {
         "COMBO": 2.151661,
         "ULTRA": 2.151661,
         "COMBO_HEDGE": 1.961532,
-        "ULTRA_HEDGE": 1.961532
+        "ULTRA_HEDGE": 1.961532,
+        "Bench": 1.868939
       },
       "Expectancy": {
         "Base": 0.020264,
@@ -4675,7 +4719,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.014098,
         "ULTRA": 0.014098,
         "COMBO_HEDGE": 0.0112,
-        "ULTRA_HEDGE": 0.0112
+        "ULTRA_HEDGE": 0.0112,
+        "Bench": 0.010468
       },
       "Avg Gain": {
         "Base": 0.056198,
@@ -4684,7 +4729,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.038882,
         "ULTRA": 0.038882,
         "COMBO_HEDGE": 0.037278,
-        "ULTRA_HEDGE": 0.037278
+        "ULTRA_HEDGE": 0.037278,
+        "Bench": 0.036734
       },
       "Avg Loss": {
         "Base": -0.040667,
@@ -4693,7 +4739,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.037948,
         "ULTRA": -0.037948,
         "COMBO_HEDGE": -0.03009,
-        "ULTRA_HEDGE": -0.03009
+        "ULTRA_HEDGE": -0.03009,
+        "Bench": -0.031121
       },
       "Rolling 1Y": {
         "Base": 0.302583,
@@ -4702,7 +4749,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.229495,
         "ULTRA": 0.229495,
         "COMBO_HEDGE": 0.184352,
-        "ULTRA_HEDGE": 0.184352
+        "ULTRA_HEDGE": 0.184352,
+        "Bench": 0.125957
       },
       "Rolling 3Y": {
         "Base": 1.512671,
@@ -4711,7 +4759,8 @@ const DASHBOARD_DATA = {
         "COMBO": 1.114104,
         "ULTRA": 1.114104,
         "COMBO_HEDGE": 0.870348,
-        "ULTRA_HEDGE": 0.870348
+        "ULTRA_HEDGE": 0.870348,
+        "Bench": 0.540623
       },
       "Best Month": {
         "Base": 0.163759,
@@ -4720,7 +4769,8 @@ const DASHBOARD_DATA = {
         "COMBO": 0.116897,
         "ULTRA": 0.116897,
         "COMBO_HEDGE": 0.09878,
-        "ULTRA_HEDGE": 0.09878
+        "ULTRA_HEDGE": 0.09878,
+        "Bench": 0.105003
       },
       "Worst Month": {
         "Base": -0.134736,
@@ -4729,7 +4779,8 @@ const DASHBOARD_DATA = {
         "COMBO": -0.121455,
         "ULTRA": -0.121455,
         "COMBO_HEDGE": -0.118959,
-        "ULTRA_HEDGE": -0.118959
+        "ULTRA_HEDGE": -0.118959,
+        "Bench": -0.113904
       },
       "Avg Ex-Ante Sharpe": {
         "Base": 4.871592,
@@ -4738,7 +4789,8 @@ const DASHBOARD_DATA = {
         "COMBO": 4.871592,
         "ULTRA": 4.871592,
         "COMBO_HEDGE": 4.871592,
-        "ULTRA_HEDGE": 4.871592
+        "ULTRA_HEDGE": 4.871592,
+        "Bench": 0.0
       }
     },
     "avg_ex_ante_sr": 4.87,
@@ -8375,21 +8427,6 @@ const DASHBOARD_DATA = {
         "date": "2026-06-02 00:00:00"
       },
       {
-        "symbol": "ATHERENERG_1d_max",
-        "clean_symbol": "ATHERENERG",
-        "sector": "Automobile and Auto Components",
-        "weight": 0.1,
-        "beta": 0.9172,
-        "erb": 1.210016,
-        "action": "SELL 39",
-        "status": "Remained",
-        "ltp": 960.599976,
-        "change_pct": 2.47,
-        "mtd_change_pct": -0.36,
-        "prev_close": 937.400024,
-        "date": "2026-06-02 00:00:00"
-      },
-      {
         "symbol": "PIRAMALFIN_1d_max",
         "clean_symbol": "PIRAMALFIN",
         "sector": "Financial Services",
@@ -8402,6 +8439,21 @@ const DASHBOARD_DATA = {
         "change_pct": -0.79,
         "mtd_change_pct": -0.96,
         "prev_close": 1923.5,
+        "date": "2026-06-02 00:00:00"
+      },
+      {
+        "symbol": "ATHERENERG_1d_max",
+        "clean_symbol": "ATHERENERG",
+        "sector": "Automobile and Auto Components",
+        "weight": 0.1,
+        "beta": 0.9172,
+        "erb": 1.210016,
+        "action": "SELL 39",
+        "status": "Remained",
+        "ltp": 960.599976,
+        "change_pct": 2.47,
+        "mtd_change_pct": -0.36,
+        "prev_close": 937.400024,
         "date": "2026-06-02 00:00:00"
       },
       {
@@ -8768,6 +8820,258 @@ const DASHBOARD_DATA = {
     "exec_history": [
       {
         "month": "2026-05",
+        "symbol": "CANHLIFE_1d_max",
+        "action": "SELL 1613",
+        "qty": 5464,
+        "price": 138.740005,
+        "return": -0.010379,
+        "sector": "Financial Services"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "PGEL_1d_max",
+        "action": "SELL 67",
+        "qty": 266,
+        "price": 483.950012,
+        "return": -0.007336,
+        "sector": "Consumer Durables"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "CPPLUS_1d_max",
+        "action": "SELL 12",
+        "qty": 325,
+        "price": 3074.699951,
+        "return": 0.045208,
+        "sector": "Capital Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "EMMVEE_1d_max",
+        "action": "BUY 935",
+        "qty": 2517,
+        "price": 329.5,
+        "return": -0.056904,
+        "sector": "Capital Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "GODFRYPHLP_1d_max",
+        "action": "SELL 12",
+        "qty": 2,
+        "price": 2300.0,
+        "return": -0.011087,
+        "sector": "Fast Moving Consumer Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "LINDEINDIA_1d_max",
+        "action": "SELL 8",
+        "qty": 11,
+        "price": 7110.0,
+        "return": -0.02391,
+        "sector": "Chemicals"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "NATIONALUM_1d_max",
+        "action": "SELL 4",
+        "qty": 224,
+        "price": 425.450012,
+        "return": 0.021037,
+        "sector": "Metals & Mining"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "INDIANB_1d_max",
+        "action": "SELL 25",
+        "qty": 96,
+        "price": 840.25,
+        "return": -0.017495,
+        "sector": "Financial Services"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "PIRAMALFIN_1d_max",
+        "action": "BUY 24",
+        "qty": 524,
+        "price": 1905.0,
+        "return": 0.001732,
+        "sector": "Financial Services"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "FACT_1d_max",
+        "action": "SELL 2",
+        "qty": 0,
+        "price": 880.0,
+        "return": 0.0,
+        "sector": "Chemicals"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "BSE_1d_max",
+        "action": "BUY 8",
+        "qty": 60,
+        "price": 4180.0,
+        "return": -0.059354,
+        "sector": "Financial Services"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "ABBOTINDIA_1d_max",
+        "action": "BUY 1",
+        "qty": 1,
+        "price": 27095.0,
+        "return": -0.029526,
+        "sector": "Healthcare"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "TARIL_1d_max",
+        "action": "SELL 44",
+        "qty": 562,
+        "price": 322.399994,
+        "return": -0.031172,
+        "sector": "Capital Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "LENSKART_1d_max",
+        "action": "SELL 253",
+        "qty": 1397,
+        "price": 524.0,
+        "return": 0.000382,
+        "sector": "Consumer Services"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "BLUESTARCO_1d_max",
+        "action": "SELL 5",
+        "qty": 0,
+        "price": 1590.099976,
+        "return": 0.0,
+        "sector": "Consumer Durables"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "JWL_1d_max",
+        "action": "SELL 30",
+        "qty": 65,
+        "price": 279.0,
+        "return": 0.01828,
+        "sector": "Capital Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "ICICIAMC_1d_max",
+        "action": "BUY 91",
+        "qty": 91,
+        "price": 3500.0,
+        "return": -0.050829,
+        "sector": "Financial Services"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "VEDL_1d_max",
+        "action": "BUY 9",
+        "qty": 9,
+        "price": 355.100006,
+        "return": -0.060687,
+        "sector": "Metals & Mining"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "TVSMOTOR_1d_max",
+        "action": "SELL 48",
+        "qty": 101,
+        "price": 3382.0,
+        "return": -0.004465,
+        "sector": "Automobile and Auto Components"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "ATHERENERG_1d_max",
+        "action": "SELL 39",
+        "qty": 1030,
+        "price": 970.0,
+        "return": -0.009691,
+        "sector": "Automobile and Auto Components"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "CHOICEIN_1d_max",
+        "action": "SELL 85",
+        "qty": 797,
+        "price": 672.950012,
+        "return": -0.01486,
+        "sector": "Financial Services"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "APARINDS_1d_max",
+        "action": "SELL 3",
+        "qty": 21,
+        "price": 13120.0,
+        "return": 0.011433,
+        "sector": "Capital Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "OIL_1d_max",
+        "action": "SELL 98",
+        "qty": 268,
+        "price": 479.75,
+        "return": 0.009067,
+        "sector": "Oil Gas & Consumable Fuels"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "HBLENGINE_1d_max",
+        "action": "SELL 7",
+        "qty": 71,
+        "price": 830.0,
+        "return": -0.032892,
+        "sector": "Capital Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "JINDALSAW_1d_max",
+        "action": "BUY 4",
+        "qty": 4,
+        "price": 247.100006,
+        "return": -0.024201,
+        "sector": "Capital Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "POWERINDIA_1d_max",
+        "action": "SELL 1",
+        "qty": 4,
+        "price": 38700.0,
+        "return": -0.092894,
+        "sector": "Capital Goods"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "BELRISE_1d_max",
+        "action": "SELL 92",
+        "qty": 4609,
+        "price": 216.960007,
+        "return": 0.004286,
+        "sector": "Automobile and Auto Components"
+      },
+      {
+        "month": "2026-05",
+        "symbol": "OLECTRA_1d_max",
+        "action": "SELL 6",
+        "qty": 0,
+        "price": 1255.0,
+        "return": 0.0,
+        "sector": "Automobile and Auto Components"
+      },
+      {
+        "month": "2026-05",
         "symbol": "CHENNPETRO_1d_max",
         "action": "SELL 19",
         "qty": 17,
@@ -8783,265 +9087,13 @@ const DASHBOARD_DATA = {
         "price": 514.950012,
         "return": 0.0,
         "sector": "Metals & Mining"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "LINDEINDIA_1d_max",
-        "action": "SELL 8",
-        "qty": 11,
-        "price": 7110.0,
-        "return": -0.02391,
-        "sector": "Chemicals"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "APARINDS_1d_max",
-        "action": "SELL 3",
-        "qty": 21,
-        "price": 13120.0,
-        "return": 0.011433,
-        "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "ABBOTINDIA_1d_max",
-        "action": "BUY 1",
-        "qty": 1,
-        "price": 27095.0,
-        "return": -0.029526,
-        "sector": "Healthcare"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "CPPLUS_1d_max",
-        "action": "SELL 12",
-        "qty": 325,
-        "price": 3074.699951,
-        "return": 0.045208,
-        "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "POWERINDIA_1d_max",
-        "action": "SELL 1",
-        "qty": 4,
-        "price": 38700.0,
-        "return": -0.092894,
-        "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "JINDALSAW_1d_max",
-        "action": "BUY 4",
-        "qty": 4,
-        "price": 247.100006,
-        "return": -0.024201,
-        "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "PGEL_1d_max",
-        "action": "SELL 67",
-        "qty": 266,
-        "price": 483.950012,
-        "return": -0.007336,
-        "sector": "Consumer Durables"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "FACT_1d_max",
-        "action": "SELL 2",
-        "qty": 0,
-        "price": 880.0,
-        "return": 0.0,
-        "sector": "Chemicals"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "ATHERENERG_1d_max",
-        "action": "SELL 39",
-        "qty": 1030,
-        "price": 970.0,
-        "return": -0.009691,
-        "sector": "Automobile and Auto Components"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "GODFRYPHLP_1d_max",
-        "action": "SELL 12",
-        "qty": 2,
-        "price": 2300.0,
-        "return": -0.011087,
-        "sector": "Fast Moving Consumer Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "HBLENGINE_1d_max",
-        "action": "SELL 7",
-        "qty": 71,
-        "price": 830.0,
-        "return": -0.032892,
-        "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "OLECTRA_1d_max",
-        "action": "SELL 6",
-        "qty": 0,
-        "price": 1255.0,
-        "return": 0.0,
-        "sector": "Automobile and Auto Components"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "VEDL_1d_max",
-        "action": "BUY 9",
-        "qty": 9,
-        "price": 355.100006,
-        "return": -0.060687,
-        "sector": "Metals & Mining"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "EMMVEE_1d_max",
-        "action": "BUY 935",
-        "qty": 2517,
-        "price": 329.5,
-        "return": -0.056904,
-        "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "JWL_1d_max",
-        "action": "SELL 30",
-        "qty": 65,
-        "price": 279.0,
-        "return": 0.01828,
-        "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "NATIONALUM_1d_max",
-        "action": "SELL 4",
-        "qty": 224,
-        "price": 425.450012,
-        "return": 0.021037,
-        "sector": "Metals & Mining"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "CANHLIFE_1d_max",
-        "action": "SELL 1613",
-        "qty": 5464,
-        "price": 138.740005,
-        "return": -0.010379,
-        "sector": "Financial Services"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "TARIL_1d_max",
-        "action": "SELL 44",
-        "qty": 562,
-        "price": 322.399994,
-        "return": -0.031172,
-        "sector": "Capital Goods"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "PIRAMALFIN_1d_max",
-        "action": "BUY 24",
-        "qty": 524,
-        "price": 1905.0,
-        "return": 0.001732,
-        "sector": "Financial Services"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "INDIANB_1d_max",
-        "action": "SELL 25",
-        "qty": 96,
-        "price": 840.25,
-        "return": -0.017495,
-        "sector": "Financial Services"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "BSE_1d_max",
-        "action": "BUY 8",
-        "qty": 60,
-        "price": 4180.0,
-        "return": -0.059354,
-        "sector": "Financial Services"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "BLUESTARCO_1d_max",
-        "action": "SELL 5",
-        "qty": 0,
-        "price": 1590.099976,
-        "return": 0.0,
-        "sector": "Consumer Durables"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "BELRISE_1d_max",
-        "action": "SELL 92",
-        "qty": 4609,
-        "price": 216.960007,
-        "return": 0.004286,
-        "sector": "Automobile and Auto Components"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "LENSKART_1d_max",
-        "action": "SELL 253",
-        "qty": 1397,
-        "price": 524.0,
-        "return": 0.000382,
-        "sector": "Consumer Services"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "ICICIAMC_1d_max",
-        "action": "BUY 91",
-        "qty": 91,
-        "price": 3500.0,
-        "return": -0.050829,
-        "sector": "Financial Services"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "CHOICEIN_1d_max",
-        "action": "SELL 85",
-        "qty": 797,
-        "price": 672.950012,
-        "return": -0.01486,
-        "sector": "Financial Services"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "TVSMOTOR_1d_max",
-        "action": "SELL 48",
-        "qty": 101,
-        "price": 3382.0,
-        "return": -0.004465,
-        "sector": "Automobile and Auto Components"
-      },
-      {
-        "month": "2026-05",
-        "symbol": "OIL_1d_max",
-        "action": "SELL 98",
-        "qty": 268,
-        "price": 479.75,
-        "return": 0.009067,
-        "sector": "Oil Gas & Consumable Fuels"
       }
     ],
     "stock_correlation": {
       "symbols": [
         "CPPLUS",
-        "ATHERENERG",
         "PIRAMALFIN",
+        "ATHERENERG",
         "BELRISE",
         "ANANDRATHI",
         "EMMVEE",
@@ -9070,8 +9122,8 @@ const DASHBOARD_DATA = {
       "matrix": [
         [
           1.0,
-          0.179,
           -0.088,
+          0.179,
           0.143,
           -0.018,
           0.222,
@@ -9098,38 +9150,9 @@ const DASHBOARD_DATA = {
           0.196
         ],
         [
-          0.179,
-          1.0,
-          0.007,
-          0.406,
-          -0.023,
-          0.369,
-          0.1,
-          0.322,
-          0.257,
-          0.204,
-          0.249,
-          0.4,
-          0.205,
-          0.151,
-          0.349,
-          0.088,
-          0.126,
-          -0.014,
-          0.146,
-          0.297,
-          0.247,
-          0.184,
-          -0.017,
-          0.142,
-          0.171,
-          0.03,
-          0.202
-        ],
-        [
           -0.088,
-          0.007,
           1.0,
+          0.007,
           0.086,
           0.05,
           0.169,
@@ -9156,9 +9179,38 @@ const DASHBOARD_DATA = {
           -0.023
         ],
         [
-          0.143,
+          0.179,
+          0.007,
+          1.0,
           0.406,
+          -0.023,
+          0.369,
+          0.1,
+          0.322,
+          0.257,
+          0.204,
+          0.249,
+          0.4,
+          0.205,
+          0.151,
+          0.349,
+          0.088,
+          0.126,
+          -0.014,
+          0.146,
+          0.297,
+          0.247,
+          0.184,
+          -0.017,
+          0.142,
+          0.171,
+          0.03,
+          0.202
+        ],
+        [
+          0.143,
           0.086,
+          0.406,
           1.0,
           0.054,
           0.257,
@@ -9186,8 +9238,8 @@ const DASHBOARD_DATA = {
         ],
         [
           -0.018,
-          -0.023,
           0.05,
+          -0.023,
           0.054,
           1.0,
           -0.014,
@@ -9215,8 +9267,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.222,
-          0.369,
           0.169,
+          0.369,
           0.257,
           -0.014,
           1.0,
@@ -9244,8 +9296,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.041,
-          0.1,
           -0.015,
+          0.1,
           0.254,
           0.014,
           0.353,
@@ -9273,8 +9325,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.046,
-          0.322,
           0.258,
+          0.322,
           0.276,
           -0.013,
           0.218,
@@ -9302,8 +9354,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.233,
-          0.257,
           -0.088,
+          0.257,
           0.443,
           0.139,
           0.259,
@@ -9331,8 +9383,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.255,
-          0.204,
           0.038,
+          0.204,
           0.415,
           0.049,
           0.24,
@@ -9360,8 +9412,8 @@ const DASHBOARD_DATA = {
         ],
         [
           -0.004,
-          0.249,
           0.086,
+          0.249,
           0.287,
           0.102,
           0.231,
@@ -9389,8 +9441,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.18,
-          0.4,
           -0.04,
+          0.4,
           0.378,
           -0.04,
           0.271,
@@ -9418,8 +9470,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.228,
-          0.205,
           0.002,
+          0.205,
           0.26,
           0.198,
           0.284,
@@ -9447,8 +9499,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.076,
-          0.151,
           0.014,
+          0.151,
           0.281,
           0.192,
           0.181,
@@ -9476,8 +9528,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.243,
-          0.349,
           -0.031,
+          0.349,
           0.403,
           0.094,
           0.137,
@@ -9505,8 +9557,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.28,
-          0.088,
           0.162,
+          0.088,
           0.456,
           -0.004,
           0.292,
@@ -9534,8 +9586,8 @@ const DASHBOARD_DATA = {
         ],
         [
           -0.006,
-          0.126,
           -0.006,
+          0.126,
           0.017,
           -0.008,
           -0.032,
@@ -9563,8 +9615,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.127,
-          -0.014,
           0.01,
+          -0.014,
           0.058,
           0.057,
           0.158,
@@ -9592,8 +9644,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.114,
-          0.146,
           0.113,
+          0.146,
           0.328,
           0.026,
           0.276,
@@ -9621,8 +9673,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.157,
-          0.297,
           0.135,
+          0.297,
           0.398,
           -0.006,
           0.306,
@@ -9650,8 +9702,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.186,
-          0.247,
           0.125,
+          0.247,
           0.522,
           0.087,
           0.358,
@@ -9679,8 +9731,8 @@ const DASHBOARD_DATA = {
         ],
         [
           -0.017,
-          0.184,
           0.047,
+          0.184,
           0.305,
           0.155,
           0.13,
@@ -9708,8 +9760,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.11,
-          -0.017,
           0.139,
+          -0.017,
           0.1,
           -0.095,
           0.213,
@@ -9737,8 +9789,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.111,
-          0.142,
           -0.014,
+          0.142,
           0.348,
           -0.055,
           0.293,
@@ -9766,8 +9818,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.123,
-          0.171,
           0.032,
+          0.171,
           0.197,
           0.021,
           0.261,
@@ -9795,8 +9847,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.088,
-          0.03,
           -0.013,
+          0.03,
           0.077,
           0.03,
           0.29,
@@ -9824,8 +9876,8 @@ const DASHBOARD_DATA = {
         ],
         [
           0.196,
-          0.202,
           -0.023,
+          0.202,
           0.276,
           0.055,
           0.184,
@@ -10370,5 +10422,5 @@ const DASHBOARD_DATA = {
     "ZYDUSWELL": "Fast Moving Consumer Goods",
     "ECLERX": "Services"
   },
-  "last_update": "2026-06-03 10:50:56 IST"
+  "last_update": "2026-06-03 11:05:25 IST"
 };
