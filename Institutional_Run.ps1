@@ -9,10 +9,12 @@ $env:PYTHONIOENCODING = "utf-8"
 
 Write-Host "`n[*] Starting Institutional_Run Pipeline..." -ForegroundColor Cyan
 
-# 1. Download Stock Data (Nifty 50 & Nifty 500)
+# 1. Download Stock Data (Nifty 50, Nifty 500 & Total 759 universe)
 Write-Host "`n[1/5] Downloading Stock Data..." -ForegroundColor Yellow
 python data_set_nifty5.py
 python data_set_nifty500.py
+# Keep the broad 759-stock universe (TOTAL_STOCKS) current as well
+python update_stocks.py
 
 # 2. Download Index Data (Spot & Futures)
 Write-Host "`n[2/5] Downloading Index Data..." -ForegroundColor Yellow
@@ -35,6 +37,13 @@ $env:STOCKS_FOLDER = "nifty500_host"
 $env:BENCHMARK_FILE = "NIFTY500_1d.csv"
 $env:OUTPUT_FILE = "Hedge_nifty500.xlsx"
 $env:DEEP_DIVE_FILE = "Hedge_Institutional_Deep_Dive_nifty500.xlsx"
+python som_hedge.py
+
+# Run for Total 759 universe (TOTAL_STOCKS, benchmarked against Nifty 500)
+$env:STOCKS_FOLDER = "TOTAL_STOCKS"
+$env:BENCHMARK_FILE = "NIFTY500_1d.csv"
+$env:OUTPUT_FILE = "Hedge_Pro_Summary_759.xlsx"
+$env:DEEP_DIVE_FILE = "Hedge_Institutional_Deep_Dive_759.xlsx"
 python som_hedge.py
 
 # 4. Extract Dashboard Data

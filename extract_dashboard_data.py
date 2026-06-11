@@ -171,7 +171,7 @@ def get_live_prices(symbols):
     results = {}
     for sym in symbols:
         found = False
-        for folder in ['nifty50_host', 'nifty500_host']:
+        for folder in ['nifty50_host', 'nifty500_host', 'TOTAL_STOCKS']:
             path = os.path.join(folder, sym + '.csv') if not sym.endswith('.csv') else os.path.join(folder, sym)
             if not os.path.exists(path):
                 path2 = os.path.join(folder, sym.replace('.csv','') + '.csv')
@@ -268,6 +268,21 @@ def get_sector_map():
         if sym_col and ind_col:
             for _, row in df.iterrows():
                 mapping[str(row[sym_col]).strip()] = str(row[ind_col]).strip()
+
+    # Augment with the TOTAL_STOCKS (759) universe — each CSV carries Symbol/Industry.
+    tdir = 'TOTAL_STOCKS'
+    if os.path.isdir(tdir):
+        for fn in os.listdir(tdir):
+            if not fn.endswith('.csv'):
+                continue
+            try:
+                d = pd.read_csv(os.path.join(tdir, fn), nrows=1, usecols=['Symbol', 'Industry'])
+                sym = str(d['Symbol'].iloc[0]).strip()
+                ind = str(d['Industry'].iloc[0]).strip()
+                if sym and sym not in mapping and ind and ind.lower() != 'nan':
+                    mapping[sym] = ind
+            except Exception:
+                pass
     return mapping
 
 def get_exec_history(xl):
@@ -298,7 +313,7 @@ def get_stock_correlation(symbols):
     returns_map = {}
     for sym in symbols:
         found = False
-        for folder in ['nifty50_host', 'nifty500_host']:
+        for folder in ['nifty50_host', 'nifty500_host', 'TOTAL_STOCKS']:
             path = os.path.join(folder, sym + '.csv') if not sym.endswith('.csv') else os.path.join(folder, sym)
             if not os.path.exists(path):
                 path2 = os.path.join(folder, sym.replace('.csv','') + '.csv')
@@ -350,10 +365,22 @@ print(f"[*] Sector map loaded: {len(sector_map)} stocks")
 
 output = {}
 
-for universe in ['nifty50', 'nifty500']:
-    fname = f"Hedge_{universe}.xlsx"
-    dd_fname = f"Hedge_Institutional_Deep_Dive_{universe}.xlsx"
-    
+# Universe -> (summary workbook, deep-dive workbook, benchmark file).
+# total759 = the broad TOTAL_STOCKS universe, benchmarked against Nifty 500.
+UNIVERSES = {
+    'nifty50':  {'summary': 'Hedge_nifty50.xlsx',         'deep': 'Hedge_Institutional_Deep_Dive_nifty50.xlsx',  'bench': 'NIFTY50_1d.csv'},
+    'nifty500': {'summary': 'Hedge_nifty500.xlsx',        'deep': 'Hedge_Institutional_Deep_Dive_nifty500.xlsx', 'bench': 'NIFTY500_1d.csv'},
+    'total759': {'summary': 'Hedge_Pro_Summary_759.xlsx', 'deep': 'Hedge_Institutional_Deep_Dive_759.xlsx',      'bench': 'NIFTY500_1d.csv'},
+}
+
+for universe, cfg in UNIVERSES.items():
+    fname = cfg['summary']
+    dd_fname = cfg['deep']
+
+    if not os.path.exists(fname):
+        print(f"\n[WARN] {fname} not found — skipping universe '{universe}'.")
+        continue
+
     print(f"\n[*] Processing {fname}...")
     xl = pd.ExcelFile(fname)
     
@@ -454,7 +481,7 @@ for universe in ['nifty50', 'nifty500']:
     stock_corr = get_stock_correlation(symbols)
 
     # 11. Live & MTD performance for portfolio and benchmark
-    bench_file = 'NIFTY50_1d.csv' if universe == 'nifty50' else 'NIFTY500_1d.csv'
+    bench_file = cfg['bench']
     
     # Extract last available date from stocks to align benchmark
     stock_last_date = None

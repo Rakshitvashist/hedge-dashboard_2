@@ -31,6 +31,7 @@ function switchUniverse(u) {
   state.universe = u;
   document.getElementById('btn-n50').classList.toggle('active', u === 'nifty50');
   document.getElementById('btn-n500').classList.toggle('active', u === 'nifty500');
+  document.getElementById('btn-n759').classList.toggle('active', u === 'total759');
   renderTab(state.tab);
 }
 
