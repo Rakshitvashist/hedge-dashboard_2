@@ -47,11 +47,21 @@ $env:DEEP_DIVE_FILE = "Hedge_Institutional_Deep_Dive_759.xlsx"
 python som_hedge.py
 
 # 4. Extract Dashboard Data
-Write-Host "`n[4/5] Extracting Data for Web Dashboard..." -ForegroundColor Yellow
+Write-Host "`n[4/6] Extracting Data for Web Dashboard..." -ForegroundColor Yellow
 python extract_dashboard_data.py
 
-# 5. Push to GitHub
-Write-Host "`n[5/5] Deploying to GitHub..." -ForegroundColor Yellow
+# 5. Validate data.js — abort the deploy if it is mathematically inconsistent
+Write-Host "`n[5/6] Validating dashboard data..." -ForegroundColor Yellow
+node backend/validator.js
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`n[ABORT] Validation failed (exit $LASTEXITCODE). NOT committing or pushing." -ForegroundColor Red
+    Write-Host "        Fix the data issue above, then re-run the pipeline." -ForegroundColor Red
+    exit 1
+}
+Write-Host "[OK] Validation passed." -ForegroundColor Green
+
+# 6. Push to GitHub
+Write-Host "`n[6/6] Deploying to GitHub..." -ForegroundColor Yellow
 git add .
 git commit -m "Daily Automated Update: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
 git push
