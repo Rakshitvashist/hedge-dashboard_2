@@ -315,7 +315,8 @@ function renderHeatmap(d, layer) {
   const years = Object.keys(grid).sort((a, b) => +b - +a);
 
   let html = '<div class="heatmap-wrap"><div class="heatmap-grid">';
-  html += '<div class="hm-head">Year</div>' + MONTHS.map(m => `<div class="hm-head">${m}</div>`).join('');
+  html += '<div class="hm-head">Year</div>' + MONTHS.map(m => `<div class="hm-head">${m}</div>`).join('')
+        + '<div class="hm-head">Total</div>';
 
   years.forEach(yr => {
     html += `<div class="hm-year">${yr}</div>`;
@@ -332,6 +333,20 @@ function renderHeatmap(d, layer) {
         </div>`;
       }
     });
+
+    // Year total: compound the available monthly returns
+    const months = grid[yr].filter(v => v !== null);
+    if (months.length) {
+      const total = +((months.reduce((acc, v) => acc * (1 + v / 100), 1) - 1) * 100).toFixed(2);
+      const bg = heatColor(total);
+      const fg = Math.abs(total) > 4 ? '#fff' : 'rgba(255,255,255,0.75)';
+      html += `<div class="hm-cell hm-total" style="background:${bg};color:${fg}"
+        title="${yr} total return: ${total}%">
+        ${total > 0 ? '+' : ''}${total}
+      </div>`;
+    } else {
+      html += `<div class="hm-cell empty"></div>`;
+    }
   });
 
   html += '</div></div>';
