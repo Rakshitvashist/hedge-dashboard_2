@@ -366,14 +366,31 @@ function openHeatModal(monthStr) {
   document.getElementById('modal-month').textContent = monthStr;
   const benchVal = row.Bench != null ? +(row.Bench * 100).toFixed(2) : null;
 
+  // Benchmark return for the same month from BOTH indices, regardless of universe
+  const benchOf = (u) => {
+    const r = DASHBOARD_DATA[u]?.monthly_detail?.find(r => String(r.Month).slice(0,7) === monthStr);
+    return r && r.Bench != null ? +(r.Bench * 100).toFixed(2) : null;
+  };
+  const fmtPct = (x) => x !== null ? (x >= 0 ? '+' : '') + x + '%' : 'N/A';
+  const n50Val  = benchOf('nifty50');
+  const n500Val = benchOf('nifty500');
+
   const bodyEl = document.getElementById('modal-body');
   const layers7 = Object.keys(LAYERS).filter(l => l !== 'Bench');
+  // The per-layer delta below compares against the ACTIVE universe's benchmark
+  const vsLabel = state.universe === 'nifty50' ? 'vs Nifty 50'
+                : state.universe === 'nifty500' ? 'vs Nifty 500'
+                : 'vs Nifty 500';
 
   bodyEl.innerHTML = `
-    <div class="modal-row" style="background:rgba(34,211,238,0.05);border-radius:.5rem;padding:.75rem">
+    <div class="modal-row" style="background:rgba(34,211,238,0.05);border-radius:.5rem;padding:.75rem;grid-template-columns:repeat(4,1fr)">
       <div>
-        <div class="modal-metric">Benchmark</div>
-        <div class="modal-val" style="color:#94a3b8">${benchVal !== null ? (benchVal >= 0 ? '+' : '') + benchVal + '%' : 'N/A'}</div>
+        <div class="modal-metric">Nifty 50</div>
+        <div class="modal-val" style="color:#94a3b8">${fmtPct(n50Val)}</div>
+      </div>
+      <div>
+        <div class="modal-metric">Nifty 500</div>
+        <div class="modal-val" style="color:#94a3b8">${fmtPct(n500Val)}</div>
       </div>
       <div>
         <div class="modal-metric">Portfolio Beta</div>
@@ -397,7 +414,7 @@ function openHeatModal(monthStr) {
             <div class="modal-val" style="color:${col}">${v !== null ? (v>=0?'+':'')+v+'%' : 'N/A'}</div>
           </div>
           <div>
-            <div class="modal-metric">vs Benchmark</div>
+            <div class="modal-metric">${vsLabel}</div>
             <div class="modal-val" style="color:${vsCol}">${vs !== null ? (vs>=0?'+':'')+vs+'%' : 'N/A'}</div>
           </div>
         </div>`;
@@ -819,36 +836,48 @@ function renderExecTable(d) {
   const el = document.getElementById('execTable');
   if (!el) return;
   const summary = d.exec_summary;
-  const layers = ['Base','ST','EMA','COMBO','ULTRA','COMBO_HEDGE','ULTRA_HEDGE','Bench'];
+  const stratLayers = ['Base','ST','EMA','COMBO','ULTRA','COMBO_HEDGE','ULTRA_HEDGE'];
   const metrics = Object.keys(summary).filter(m => m !== 'Sharpe' && m !== 'Sortino');
+
+  // Strategy columns come from the active universe; the benchmark columns always
+  // show BOTH Nifty 50 and Nifty 500 so the strategy can be read against each index.
+  const n50  = DASHBOARD_DATA.nifty50?.exec_summary;
+  const n500 = DASHBOARD_DATA.nifty500?.exec_summary;
+  const columns = [
+    ...stratLayers.map(l => ({ label: LAYERS[l].label, cls: LAYERS[l].cls,
+                               isBench: false, get: m => summary[m]?.[l] })),
+    { label: 'Nifty 50',  cls: 'ltag-bench', isBench: true, get: m => n50?.[m]?.Bench },
+    { label: 'Nifty 500', cls: 'ltag-bench', isBench: true, get: m => n500?.[m]?.Bench },
+  ];
+
+  const pctMetrics = ['CAGR','XIRR','Volatility','Alpha vs Bench','Max Drawdown',
+                      'VaR 95%','VaR 99%','CVaR 95%','CVaR 99%','Downside Dev',
+                      'Best Month','Worst Month','Avg Gain','Avg Loss',
+                      'Rolling 1Y','Rolling 3Y','Abs Return'];
 
   el.innerHTML = `
     <thead>
       <tr>
         <th>Metric</th>
-        ${layers.map(l => `<th><span class="ltag ${LAYERS[l].cls}" style="font-size:.6rem">${LAYERS[l].label}</span></th>`).join('')}
+        ${columns.map(c => `<th><span class="ltag ${c.cls}" style="font-size:.6rem">${c.label}</span></th>`).join('')}
       </tr>
     </thead>
     <tbody>
       ${metrics.map(metric => `
         <tr>
           <td class="text-muted" style="font-size:.72rem;font-weight:600">${metric}</td>
-          ${layers.map(l => {
-            const v = summary[metric]?.[l];
-            if (v == null) return '<td>—</td>';
-            
-            // Check if metric is not applicable for benchmark
-            const isBench = l === 'Bench';
-            if (isBench && (metric === 'Alpha vs Bench' || metric === 'Avg Ex-Ante Sharpe' || metric === 'Info Ratio')) {
+          ${columns.map(c => {
+            const v = c.get(metric);
+            if (v == null) return '<td class="mono text-muted" style="font-size:.75rem">—</td>';
+
+            // Some metrics are not applicable to a benchmark column
+            if (c.isBench && (metric === 'Alpha vs Bench' || metric === 'Avg Ex-Ante Sharpe' || metric === 'Info Ratio')) {
               return '<td class="mono text-muted" style="font-size:.75rem">—</td>';
             }
-            
-            const pct = ['CAGR','XIRR','Volatility','Alpha vs Bench','Max Drawdown',
-                         'VaR 95%','VaR 99%','CVaR 95%','CVaR 99%','Downside Dev',
-                         'Best Month','Worst Month','Avg Gain','Avg Loss',
-                         'Rolling 1Y','Rolling 3Y','Abs Return'].includes(metric);
+
+            const pct = pctMetrics.includes(metric);
             const display = pct ? (v*100).toFixed(2)+'%' : v.toFixed(4);
-            const col = isBench && metric === 'Alpha vs Bench' ? 'text-muted' : (v >= 0 ? 'text-emerald' : 'text-rose');
+            const col = c.isBench && metric === 'Alpha vs Bench' ? 'text-muted' : (v >= 0 ? 'text-emerald' : 'text-rose');
             return `<td class="mono ${col}" style="font-size:.75rem">${display}</td>`;
           }).join('')}
         </tr>`).join('')}
