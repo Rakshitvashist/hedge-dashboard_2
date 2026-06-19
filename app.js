@@ -14,7 +14,7 @@ const LAYERS = {
 let state = { 
   universe: 'nifty50', 
   tab: 'overview', 
-  heatLayer: 'ULTRA_HEDGE',
+  heatLayer: 'Base',
   chartTypes: {
     equityOverview: 'line',
     betaChart: 'bar',
