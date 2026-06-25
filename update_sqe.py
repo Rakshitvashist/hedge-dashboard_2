@@ -6,19 +6,22 @@ data.js and holdings.js can never drift apart. It ONLY touches the two data
 files — the SQE site's customised app.js / index.html / style.css are never
 overwritten.
 
-Steps (all from the same workbook state -> no data mismatch):
-  1. (optional) regenerate data.js via extract_dashboard_data.py
-  2. regenerate holdings.js via build_holdings.py   (reads the same workbook)
-  3. copy data.js into the SQE site
-  4. commit & push the SQE repo (its pre-commit hook bumps the cache-bust ?v=)
+Steps (all from the same source state -> no data mismatch):
+  1. (--extract) refresh per-stock price CSVs from yfinance so live prices are
+     current: data_set_nifty5.py (nifty50_host), data_set_nifty500.py
+     (nifty500_host), update_stocks.py (TOTAL_STOCKS)
+  2. (--extract) regenerate data.js via extract_dashboard_data.py
+  3. regenerate holdings.js via build_holdings.py   (reads the same workbook)
+  4. copy data.js into the SQE site
+  5. commit & push the SQE repo (its pre-commit hook bumps the cache-bust ?v=)
 
 Usage:
   python update_sqe.py            # sync current data.js + rebuild holdings, push
-  python update_sqe.py --extract  # also re-run the full extractor first (slow)
+  python update_sqe.py --extract  # full live refresh: prices -> extract -> push
 
-Note: run this AFTER the workbook (Hedge_Pro_Summary_759.xlsx) is up to date.
-Without --extract it reuses the existing data.js, so make sure data.js was
-generated from the current workbook (e.g. right after the daily update).
+--extract fetches ~1300 symbols from yfinance (a few minutes, needs network),
+exactly like the original daily flow, so the live portfolio shows up-to-date
+prices. Without it, the existing data.js is reused as-is.
 """
 import os
 import re
@@ -57,18 +60,29 @@ def main():
     py = sys.executable
 
     if extract:
-        print('[1/4] Regenerating data.js (extract_dashboard_data.py) ...')
+        # Refresh the per-stock price CSVs from yfinance FIRST (same as the
+        # original daily flow) so the live portfolio shows current prices.
+        # get_live_prices reads nifty50_host -> nifty500_host -> TOTAL_STOCKS,
+        # so all three are refreshed to stay consistent.
+        print('[1/5] Refreshing live price CSVs from yfinance (this takes a few minutes) ...')
+        for sc in ('data_set_nifty5.py', 'data_set_nifty500.py', 'update_stocks.py'):
+            if os.path.exists(os.path.join(MAIN, sc)):
+                print(f'   -> {sc}')
+                run([py, sc], cwd=MAIN)
+            else:
+                print(f'   (skip) {sc} not found')
+        print('[2/5] Regenerating data.js (extract_dashboard_data.py) ...')
         run([py, 'extract_dashboard_data.py'], cwd=MAIN)
     else:
-        print('[1/4] Using existing data.js (pass --extract to regenerate).')
+        print('[1-2/5] Using existing data.js (pass --extract for a full live price refresh).')
 
-    print('[2/4] Regenerating holdings.js (build_holdings.py) ...')
+    print('[3/5] Regenerating holdings.js (build_holdings.py) ...')
     run([py, 'build_holdings.py'], cwd=MAIN)
 
-    print('[3/4] Copying data.js -> SQE site ...')
+    print('[4/5] Copying data.js -> SQE site ...')
     shutil.copyfile(os.path.join(MAIN, 'data.js'), os.path.join(SQE, 'data.js'))
 
-    print('[4/4] Commit & push SQE repo ...')
+    print('[5/5] Commit & push SQE repo ...')
     run(['git', 'add', 'data.js', 'holdings.js'], cwd=SQE)
     # Commit only if something actually changed.
     if run(['git', 'diff', '--cached', '--quiet'], cwd=SQE, check=False).returncode == 0:
