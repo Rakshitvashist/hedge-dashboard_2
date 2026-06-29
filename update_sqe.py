@@ -39,10 +39,13 @@ def run(cmd, cwd=None, check=True):
 
 
 def data_last_update(path):
+    # last_update sits at the END of data.js, so read the tail of the file.
     try:
-        with open(path, 'r', encoding='utf-8') as f:
-            head = f.read(4000)
-        m = re.search(r'"last_update"\s*:\s*"([^"]+)"', head)
+        with open(path, 'rb') as f:
+            f.seek(0, 2)
+            f.seek(max(0, f.tell() - 4000))
+            tail = f.read().decode('utf-8', 'ignore')
+        m = re.search(r'"last_update"\s*:\s*"([^"]+)"', tail)
         return m.group(1) if m else 'unknown'
     except OSError:
         return 'unknown'
