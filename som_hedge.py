@@ -26,8 +26,9 @@ NIFTY_FUTURES_DIR = "futures_parquet"
 OUTPUT_FILE      = os.environ.get("OUTPUT_FILE", "Hedge_nifty50.xlsx")
 DEEP_DIVE_FILE   = os.environ.get("DEEP_DIVE_FILE", "Hedge_Institutional_Deep_Dive_nifty50.xlsx")
 
-# Backtest period
-START_MONTH      = "2019-12"
+# Backtest period (override via START_MONTH env var; the SQE pipeline passes
+# 2019-12, the main dashboard's daily run uses the 2021-04 default).
+START_MONTH      = os.environ.get("START_MONTH", "2021-04")
 # END_MONTH is the last *analysis* month whose trade_month (port_month+1) is the current live month.
 # We stop at (current_month - 1) so that trade_month never goes beyond the current calendar month.
 _now             = datetime.now()
