@@ -14,12 +14,15 @@ Return: the formation price recovers that month's market price, so a stock's
 Sectors are resolved on the front-end via DASHBOARD_DATA.sector_map.
 """
 import json
+import os
 import re
 import math
 import pandas as pd
 
-SRC = 'Hedge_Pro_Summary_759.xlsx'
-OUT = r'd:/SQE-host/holdings.js'
+# Override per site via env: e.g. HOLDINGS_SRC=Hedge_nifty500.xlsx
+# HOLDINGS_OUT=d:/SQE-ProQuant-host/holdings.js
+SRC = os.environ.get('HOLDINGS_SRC', 'Hedge_Pro_Summary_759.xlsx')
+OUT = os.environ.get('HOLDINGS_OUT', r'd:/SQE-host/holdings.js')
 CAPITAL = 10_000_000
 
 
