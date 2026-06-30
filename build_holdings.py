@@ -34,8 +34,9 @@ def num(v):
         return None
 
 
-def main():
-    xl = pd.ExcelFile(SRC)
+def build_one(src):
+    """Return {month: [holding,...]} for one workbook."""
+    xl = pd.ExcelFile(src)
     port_sheets = sorted(s for s in xl.sheet_names if re.fullmatch(r'Port_\d{4}-\d{2}', s))
 
     months_data = {}   # month -> list of holding dicts (with 'full' symbol key)
@@ -85,16 +86,31 @@ def main():
             row['r'] = r
             del row['full']
         months_data[m].sort(key=lambda x: x['w'], reverse=True)
+    return months_data
 
-    payload = json.dumps(months_data, separators=(',', ':'), ensure_ascii=False)
+
+def main():
+    # HOLDINGS_MAP="univ:workbook,univ:workbook" -> keyed MONTHLY_HOLDINGS per
+    # universe (multi-universe site). Otherwise a flat object from SRC.
+    hmap = os.environ.get('HOLDINGS_MAP', '').strip()
+    if hmap:
+        out = {}
+        for pair in hmap.split(','):
+            univ, src = pair.split(':', 1)
+            out[univ.strip()] = build_one(src.strip())
+            n = len(out[univ.strip()])
+            print(f'[holdings] {univ.strip()}: {n} months from {src.strip()}')
+        payload = out
+    else:
+        payload = build_one(SRC)
+        total = sum(len(v) for v in payload.values())
+        print(f'[holdings] {len(payload)} months, {total} holding rows from {SRC}')
+
+    js = json.dumps(payload, separators=(',', ':'), ensure_ascii=False)
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write('/* Per-month Base SIM holdings for the heatmap modal. Auto-generated. */\n')
-        f.write('const MONTHLY_HOLDINGS = ' + payload + ';\n')
-
-    total = sum(len(v) for v in months_data.values())
-    print(f'[holdings] {len(months_data)} months, {total} holding rows -> {OUT}')
-    s = next(iter(months_data))
-    print(f'[holdings] sample {s}: {len(months_data[s])} stocks, first = {months_data[s][0] if months_data[s] else None}')
+        f.write('const MONTHLY_HOLDINGS = ' + js + ';\n')
+    print(f'[holdings] wrote -> {OUT}')
 
 
 if __name__ == '__main__':

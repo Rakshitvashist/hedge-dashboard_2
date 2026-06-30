@@ -36,13 +36,15 @@ import sys
 
 MAIN = os.path.dirname(os.path.abspath(__file__))   # the main repo (this folder)
 
-# Both SQE sites share the same data.js (all universes); each has its own
-# holdings.js generated from its workbook.
+# Both SQE sites share the same data.js (all universes). Each site's holdings.js
+# is generated from its workbook(s): a single 'workbook' -> flat MONTHLY_HOLDINGS;
+# a 'holdings_map' (univ:workbook,...) -> MONTHLY_HOLDINGS keyed by universe
+# (multi-universe site).
 SITES = [
     {'name': 'All-Indices', 'dir': os.environ.get('SQE_HOST', r'd:/SQE-host'),
      'workbook': 'Hedge_Pro_Summary_759.xlsx'},
-    {'name': 'Nifty 500',   'dir': os.environ.get('PROQUANT_HOST', r'd:/SQE-ProQuant-host'),
-     'workbook': 'Hedge_nifty500.xlsx'},
+    {'name': 'ProQuant',    'dir': os.environ.get('PROQUANT_HOST', r'd:/SQE-ProQuant-host'),
+     'holdings_map': 'nifty500:Hedge_nifty500.xlsx,total759:Hedge_Pro_Summary_759.xlsx'},
 ]
 
 # The SQE site backtests from an earlier start than the main dashboard (which
@@ -122,9 +124,12 @@ def main():
     stamp = data_last_update(os.path.join(MAIN, 'data.js'))
     for i, s in enumerate(sites, 1):
         print(f"\n[{i}/{len(sites)}] Updating {s['name']} site ({s['dir']}) ...")
-        # Site-specific holdings.js from its own workbook.
-        env = {**os.environ, 'HOLDINGS_SRC': s['workbook'],
-               'HOLDINGS_OUT': os.path.join(s['dir'], 'holdings.js')}
+        # Site-specific holdings.js (flat from one workbook, or keyed per universe).
+        env = {**os.environ, 'HOLDINGS_OUT': os.path.join(s['dir'], 'holdings.js')}
+        if s.get('holdings_map'):
+            env['HOLDINGS_MAP'] = s['holdings_map']
+        else:
+            env['HOLDINGS_SRC'] = s['workbook']
         run([py, 'build_holdings.py'], cwd=MAIN, env=env)
         # Same shared data.js for every site.
         shutil.copyfile(os.path.join(MAIN, 'data.js'), os.path.join(s['dir'], 'data.js'))
