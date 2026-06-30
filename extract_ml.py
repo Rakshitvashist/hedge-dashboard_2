@@ -111,56 +111,48 @@ def _is_ticker(s):
 
 def read_holdings():
     """Per-month holdings from PM_ sheets + a symbol->sector map. PM_YYYY-MM is the
-    portfolio FORMED for YYYY-MM, traded the next month. Weights are SIM-cap %
-    (fraction in the sheet -> x100); price is the per-stock avg buy price; the
-    month return is derived from the next month's avg price (like build_holdings)."""
+    portfolio FORMED for YYYY-MM, traded the next month. The holdings are a single
+    contiguous block under the row-11 header; below it come blank rows and a
+    correlation matrix (whose ticker headers were leaking in as bogus rows), so we
+    STOP at the first non-ticker row. Weight is SIM-cap % (sheet fraction -> x100),
+    price is the avg buy price, and return is the sheet's realized 'Return %'."""
     xl = pd.ExcelFile(WB)
     pm_sheets = sorted(s for s in xl.sheet_names if re.fullmatch(r'PM_\d{4}-\d{2}', s))
-    raw, sector_map = {}, {}
+    holdings, sector_map = {}, {}
     for sh in pm_sheets:
         df = pd.read_excel(xl, sheet_name=sh, header=11)
         if 'Symbol' not in df.columns:
             continue
         wcol = next((c for c in df.columns if 'Capped' in str(c)), None)
         pcol = next((c for c in df.columns if str(c).startswith('Avg Price')), None)
+        rcol = next((c for c in df.columns if str(c).strip() == 'Return %'), None)
         pm = sh.replace('PM_', '')
         y, m = int(pm[:4]), int(pm[5:7]) + 1
         if m > 12:
             m = 1; y += 1
         trade = f'{y:04d}-{m:02d}'
-        rows = {}
+        rows = []
         for _, r in df.iterrows():
             sym = str(r.get('Symbol', '')).strip()
-            if not _is_ticker(sym):
-                continue   # stop including junk rows after the holdings table
             w = num(r.get(wcol)) if wcol else None
+            if not _is_ticker(sym) or w is None or w <= 0:
+                break   # end of the contiguous holdings block (blanks/correlation follow)
             p = num(r.get(pcol)) if pcol else None
+            rr = num(r.get(rcol)) if rcol else None
             sec = str(r.get('Sector', '')).strip() or '—'
             if not sec[0].isdigit():
                 sector_map[sym] = sec
-            rows[sym] = {
+            rows.append({
                 's': sym, 'sec': sec,
-                'w': round(w * 100, 2) if w is not None else None,   # fraction -> %
+                'w': round(w * 100, 2),                               # fraction -> %
                 'p': round(p, 2) if (p is not None and p > 0) else None,
+                'r': round(rr * 100, 2) if rr is not None else None,  # realized %, fraction -> %
                 'st': str(r.get('Status', '')).strip() or '—', 'a': '—',
                 'b': round(num(r.get('Beta')) or 0, 3),
                 'e': round(num(r.get('ERB')) or 0, 3),
-            }
-        raw[trade] = rows
-
-    # Per-stock month return from the next month's avg price.
-    months = sorted(raw)
-    holdings = {}
-    for i, mn in enumerate(months):
-        nxt = months[i + 1] if i + 1 < len(months) else None
-        lst = []
-        for sym, h in raw[mn].items():
-            r = None
-            if nxt and h['p'] and raw[nxt].get(sym, {}).get('p'):
-                r = round((raw[nxt][sym]['p'] / h['p'] - 1) * 100, 2)
-            lst.append({**h, 'r': r})
-        lst.sort(key=lambda x: x['w'] or 0, reverse=True)
-        holdings[mn] = lst
+            })
+        rows.sort(key=lambda x: x['w'] or 0, reverse=True)
+        holdings[trade] = rows
     return holdings, sector_map
 
 
