@@ -101,7 +101,9 @@ def main():
         # INCREMENTAL — they only append rows since each CSV's last date, so old
         # data is never re-fetched; only the newest days are added.
         print('[1] Refreshing latest prices from yfinance (incremental — appends new days only) ...')
-        for sc in ('data_set_nifty5.py', 'data_set_nifty500.py', 'update_stocks.py'):
+        # index_data.py refreshes the benchmark index files (NIFTY50_1d.csv /
+        # NIFTY500_1d.csv) — without it the benchmark return goes stale.
+        for sc in ('data_set_nifty5.py', 'data_set_nifty500.py', 'update_stocks.py', 'index_data.py'):
             if os.path.exists(os.path.join(MAIN, sc)):
                 print(f'   -> {sc}')
                 run([py, sc], cwd=MAIN)

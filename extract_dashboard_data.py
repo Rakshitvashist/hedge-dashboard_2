@@ -166,8 +166,23 @@ def get_current_portfolio(xl, sector_map):
         stocks.append(stock_data)
     return stocks
 
+def trim_open_bar(df, date_col):
+    """Drop today's row while the NSE session is still open, so the last row is
+    always a COMPLETED daily close (avoids intraday price flicker in live market).
+    After 15:30 IST today's bar is the final close and is kept."""
+    if df.empty:
+        return df
+    now = datetime.now()  # server runs in IST
+    mins = now.hour * 60 + now.minute
+    market_open = now.weekday() < 5 and (9 * 60 + 15) <= mins <= (15 * 60 + 30)
+    if market_open and df[date_col].iloc[-1].date() == now.date():
+        return df.iloc[:-1]
+    return df
+
+
 def get_live_prices(symbols):
-    """Read last 2 rows of each CSV to get today's change % and MTD baseline close."""
+    """Last COMPLETED daily close per stock (today's open bar is ignored during
+    market hours) plus the prior close and the MTD baseline."""
     results = {}
     for sym in symbols:
         found = False
@@ -186,6 +201,7 @@ def get_live_prices(symbols):
                 date_col = 'date' if 'date' in df.columns else df.columns[0]
                 df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
                 df = df.dropna(subset=[date_col]).sort_values(date_col).drop_duplicates(subset=[date_col], keep='last')
+                df = trim_open_bar(df, date_col)   # use last completed close, not intraday
                 if len(df) < 2:
                     continue
                 last = df.iloc[-1]
@@ -229,7 +245,8 @@ def get_benchmark_live_and_mtd(bench_file, target_date=None):
         date_col = next((c for c in df.columns if 'date' in c.lower() or 'time' in c.lower()), df.columns[0])
         df[date_col] = pd.to_datetime(df[date_col], dayfirst=True, errors='coerce')
         df = df.dropna(subset=[date_col]).sort_values(date_col).drop_duplicates(subset=[date_col], keep='last')
-        
+        df = trim_open_bar(df, date_col)   # last completed close, not intraday
+
         # Align with target_date if provided (useful when stock data is lagging)
         if target_date:
             try:
