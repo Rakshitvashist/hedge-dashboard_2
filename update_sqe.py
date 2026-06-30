@@ -48,7 +48,7 @@ SITES = [
     {'name': 'All-Indices', 'dir': os.environ.get('SQE_HOST', r'd:/SQE-host'),
      'workbook': 'Hedge_Pro_Summary_759.xlsx'},
     {'name': 'ProQuant',    'dir': os.environ.get('PROQUANT_HOST', r'd:/SQE-ProQuant-host'),
-     'holdings_map': 'nifty500:Hedge_nifty500.xlsx,total759:Hedge_Pro_Summary_759.xlsx',
+     'holdings_map': 'nifty50:Hedge_nifty50.xlsx,nifty500:Hedge_nifty500.xlsx,total759:Hedge_Pro_Summary_759.xlsx',
      'ml': True},   # also regenerate ml_data.js (ML Forecast universe)
 ]
 
