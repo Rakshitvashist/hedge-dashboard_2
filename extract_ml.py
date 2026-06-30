@@ -16,9 +16,22 @@ import re
 import numpy as np
 import pandas as pd
 
+import glob
+
 ML_DIR = os.environ.get('ML_DIR', r'D:/PC2546/portfolio')
 WB = os.path.join(ML_DIR, 'Sharpe_ML_Forecast_NIFTY500.xlsx')
-CURRENT = os.path.join(ML_DIR, 'Current_Portfolio_ML_Forecast_NIFTY500_new.xlsx')
+
+
+def _newest_current():
+    """Pick the most recently modified Current_Portfolio_ML_Forecast_NIFTY500*.xlsx
+    (handles the '_new' variant + future regenerations), skipping Excel lock files."""
+    cands = [p for p in glob.glob(os.path.join(ML_DIR, 'Current_Portfolio_ML_Forecast_NIFTY500*.xlsx'))
+             if not os.path.basename(p).startswith('~$')]
+    return max(cands, key=os.path.getmtime) if cands else \
+        os.path.join(ML_DIR, 'Current_Portfolio_ML_Forecast_NIFTY500_new.xlsx')
+
+
+CURRENT = _newest_current()
 OUT = os.environ.get('ML_OUT', r'd:/SQE-ProQuant-host/ml_data.js')
 RF = 0.06
 
