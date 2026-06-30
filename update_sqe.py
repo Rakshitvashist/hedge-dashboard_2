@@ -35,7 +35,15 @@ import subprocess
 import sys
 
 MAIN = os.path.dirname(os.path.abspath(__file__))   # the main repo (this folder)
-SQE = os.environ.get('SQE_HOST', r'd:/SQE-host')    # the SQE site repo
+
+# Both SQE sites share the same data.js (all universes); each has its own
+# holdings.js generated from its workbook.
+SITES = [
+    {'name': 'All-Indices', 'dir': os.environ.get('SQE_HOST', r'd:/SQE-host'),
+     'workbook': 'Hedge_Pro_Summary_759.xlsx'},
+    {'name': 'Nifty 500',   'dir': os.environ.get('PROQUANT_HOST', r'd:/SQE-ProQuant-host'),
+     'workbook': 'Hedge_nifty500.xlsx'},
+]
 
 # The SQE site backtests from an earlier start than the main dashboard (which
 # defaults to 2021-04). 2019-12 -> first held portfolio Jan 2020.
@@ -70,11 +78,14 @@ def data_last_update(path):
 def main():
     extract = '--extract' in sys.argv
 
-    for p in (MAIN, SQE):
-        if not os.path.isdir(p):
-            sys.exit(f'[error] path not found: {p}')
-    if not os.path.isdir(os.path.join(SQE, '.git')):
-        sys.exit(f'[error] {SQE} is not a git repo')
+    if not os.path.isdir(MAIN):
+        sys.exit(f'[error] path not found: {MAIN}')
+    sites = [s for s in SITES if os.path.isdir(os.path.join(s['dir'], '.git'))]
+    for s in SITES:
+        if s not in sites:
+            print(f"   [warn] skipping {s['name']}: {s['dir']} is not a git repo")
+    if not sites:
+        sys.exit('[error] no SQE site repos found')
 
     py = sys.executable
 
@@ -99,27 +110,37 @@ def main():
                    'START_MONTH': SQE_START_MONTH, 'PYTHONIOENCODING': 'utf-8'}
             print(f'   -> {out}  ({stocks})')
             run([py, '-u', 'som_hedge.py'], cwd=MAIN, env=env)
-        print('[2b/5] Regenerating data.js (extract_dashboard_data.py) ...')
-        run([py, 'extract_dashboard_data.py'], cwd=MAIN)
     else:
-        print('[1-2/5] Using existing data.js (pass --extract for a full rebuild).')
+        print('[1-2] Quick mode: skipping price refresh + backtests (pass --extract for those).')
 
-    print('[3/5] Regenerating holdings.js (build_holdings.py) ...')
-    run([py, 'build_holdings.py'], cwd=MAIN)
+    # ALWAYS regenerate data.js from the current workbooks so the SQE sites
+    # reflect the workbook state directly — never the main repo's own data.js
+    # (which may be the main dashboard's different history).
+    print('[3] Regenerating data.js from workbooks (extract_dashboard_data.py) ...')
+    run([py, 'extract_dashboard_data.py'], cwd=MAIN)
 
-    print('[4/5] Copying data.js -> SQE site ...')
-    shutil.copyfile(os.path.join(MAIN, 'data.js'), os.path.join(SQE, 'data.js'))
+    stamp = data_last_update(os.path.join(MAIN, 'data.js'))
+    for i, s in enumerate(sites, 1):
+        print(f"\n[{i}/{len(sites)}] Updating {s['name']} site ({s['dir']}) ...")
+        # Site-specific holdings.js from its own workbook.
+        env = {**os.environ, 'HOLDINGS_SRC': s['workbook'],
+               'HOLDINGS_OUT': os.path.join(s['dir'], 'holdings.js')}
+        run([py, 'build_holdings.py'], cwd=MAIN, env=env)
+        # Same shared data.js for every site.
+        shutil.copyfile(os.path.join(MAIN, 'data.js'), os.path.join(s['dir'], 'data.js'))
+        run(['git', 'add', 'data.js', 'holdings.js'], cwd=s['dir'])
+        if run(['git', 'diff', '--cached', '--quiet'], cwd=s['dir'], check=False).returncode == 0:
+            print(f"   No changes - {s['name']} already up to date.")
+            continue
+        run(['git', 'commit', '-m', f'data: sync data.js + holdings.js ({stamp})'], cwd=s['dir'])
+        run(['git', 'push', 'origin', 'main'], cwd=s['dir'])
+        print(f"   [OK] {s['name']} pushed.")
 
-    print('[5/5] Commit & push SQE repo ...')
-    run(['git', 'add', 'data.js', 'holdings.js'], cwd=SQE)
-    # Commit only if something actually changed.
-    if run(['git', 'diff', '--cached', '--quiet'], cwd=SQE, check=False).returncode == 0:
-        print('   No data changes - SQE site already up to date.')
-        return
-    stamp = data_last_update(os.path.join(SQE, 'data.js'))
-    run(['git', 'commit', '-m', f'data: sync SQE data.js + holdings.js ({stamp})'], cwd=SQE)
-    run(['git', 'push', 'origin', 'main'], cwd=SQE)
-    print(f'\n[OK] SQE site updated and pushed (data as of {stamp}).')
+    # Leave the main repo pristine — extract regenerated its data.js/index.html
+    # only as a transient source for the SQE sites; the main dashboard keeps its
+    # own (committed) state.
+    run(['git', 'checkout', '--', 'data.js', 'index.html'], cwd=MAIN, check=False)
+    print(f'\n[OK] Done. Sites updated (data as of {stamp}). Main repo left unchanged.')
 
 
 if __name__ == '__main__':
