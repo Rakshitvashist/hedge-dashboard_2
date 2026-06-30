@@ -48,7 +48,8 @@ SITES = [
     {'name': 'All-Indices', 'dir': os.environ.get('SQE_HOST', r'd:/SQE-host'),
      'workbook': 'Hedge_Pro_Summary_759.xlsx'},
     {'name': 'ProQuant',    'dir': os.environ.get('PROQUANT_HOST', r'd:/SQE-ProQuant-host'),
-     'holdings_map': 'nifty500:Hedge_nifty500.xlsx,total759:Hedge_Pro_Summary_759.xlsx'},
+     'holdings_map': 'nifty500:Hedge_nifty500.xlsx,total759:Hedge_Pro_Summary_759.xlsx',
+     'ml': True},   # also regenerate ml_data.js (ML Forecast universe)
 ]
 
 # The SQE site backtests from an earlier start than the main dashboard (which
@@ -144,7 +145,16 @@ def main():
         run([py, 'build_holdings.py'], cwd=MAIN, env=env)
         # Same shared data.js for every site.
         shutil.copyfile(os.path.join(MAIN, 'data.js'), os.path.join(s['dir'], 'data.js'))
-        run(['git', 'add', 'data.js', 'holdings.js'], cwd=s['dir'])
+        add_files = ['data.js', 'holdings.js']
+        # Optional ML Forecast universe (reads its own workbook in ML_DIR).
+        if s.get('ml') and os.path.exists(os.path.join(MAIN, 'extract_ml.py')):
+            mlenv = {**os.environ, 'ML_OUT': os.path.join(s['dir'], 'ml_data.js')}
+            rc = run([py, 'extract_ml.py'], cwd=MAIN, env=mlenv, check=False).returncode
+            if rc == 0:
+                add_files.append('ml_data.js')
+            else:
+                print('   [warn] extract_ml.py failed — keeping previous ml_data.js')
+        run(['git', 'add', *add_files], cwd=s['dir'])
         if run(['git', 'diff', '--cached', '--quiet'], cwd=s['dir'], check=False).returncode == 0:
             print(f"   No changes - {s['name']} already up to date.")
             continue
