@@ -21,12 +21,16 @@ dashboard's daily run), and this pipeline overrides START_MONTH=2019-12, so the
 two dashboards stay independent.
 
 Usage:
-  python update_sqe.py            # sync current data.js + rebuild holdings, push
-  python update_sqe.py --extract  # full rebuild: prices -> 3 backtests -> extract -> push
+  python update_sqe.py --prices   # NEWEST DATA: refresh latest prices -> push both
+  python update_sqe.py --extract  # NEW MONTH: prices -> backtests -> push both
+  python update_sqe.py            # quick: just regenerate from workbooks -> push both
 
---extract is HEAVY (~1300 yfinance symbols + 3 full backtests, ~30-60 min,
-needs network). Use it when refreshing the SQE site's data for a new month.
-Without it, the existing data.js is reused as-is (quick sync only).
+--prices is the routine "add the newest data" command: the yfinance scripts are
+incremental (append only new days, never re-fetch old data), so it just brings
+the live prices up to date and pushes both sites (~5-10 min, no backtest).
+--extract additionally re-runs the backtests; use it once a new month closes and
+a new portfolio is formed (~30-60 min). Both leave history unchanged — past
+months are deterministic.
 """
 import os
 import re
@@ -78,7 +82,8 @@ def data_last_update(path):
 
 
 def main():
-    extract = '--extract' in sys.argv
+    extract = '--extract' in sys.argv   # full: prices + backtests
+    prices = '--prices' in sys.argv     # light: latest prices only, no backtest
 
     if not os.path.isdir(MAIN):
         sys.exit(f'[error] path not found: {MAIN}')
@@ -91,29 +96,33 @@ def main():
 
     py = sys.executable
 
-    if extract:
-        # Refresh the per-stock price CSVs from yfinance FIRST (same as the
-        # original daily flow) so the live portfolio shows current prices.
-        # get_live_prices reads nifty50_host -> nifty500_host -> TOTAL_STOCKS,
-        # so all three are refreshed to stay consistent.
-        print('[1/5] Refreshing live price CSVs from yfinance (this takes a few minutes) ...')
+    if extract or prices:
+        # Refresh the per-stock price CSVs from yfinance. These scripts are
+        # INCREMENTAL — they only append rows since each CSV's last date, so old
+        # data is never re-fetched; only the newest days are added.
+        print('[1] Refreshing latest prices from yfinance (incremental — appends new days only) ...')
         for sc in ('data_set_nifty5.py', 'data_set_nifty500.py', 'update_stocks.py'):
             if os.path.exists(os.path.join(MAIN, sc)):
                 print(f'   -> {sc}')
                 run([py, sc], cwd=MAIN)
             else:
                 print(f'   (skip) {sc} not found')
-        # Re-run the 3 backtests with the SQE start month so the SQE site stays
-        # at its earlier history independently of the main dashboard's default.
-        print(f'[2/5] Running backtests (som_hedge.py, START_MONTH={SQE_START_MONTH}) for all 3 universes ...')
+
+    if extract:
+        # Re-run the backtests only when a new MONTH has closed (a new portfolio
+        # is formed). Past months are deterministic so they come out identical;
+        # this just appends the latest month.
+        print(f'[2] Running backtests (som_hedge.py, START_MONTH={SQE_START_MONTH}) for all 3 universes ...')
         for stocks, bench, out, deep in BACKTESTS:
             env = {**os.environ, 'STOCKS_FOLDER': stocks, 'BENCHMARK_FILE': bench,
                    'OUTPUT_FILE': out, 'DEEP_DIVE_FILE': deep,
                    'START_MONTH': SQE_START_MONTH, 'PYTHONIOENCODING': 'utf-8'}
             print(f'   -> {out}  ({stocks})')
             run([py, '-u', 'som_hedge.py'], cwd=MAIN, env=env)
+    elif prices:
+        print('[2] Skipping backtests (prices mode — no new month to add).')
     else:
-        print('[1-2] Quick mode: skipping price refresh + backtests (pass --extract for those).')
+        print('[1-2] Quick mode: skipping price refresh + backtests.')
 
     # ALWAYS regenerate data.js from the current workbooks so the SQE sites
     # reflect the workbook state directly — never the main repo's own data.js
