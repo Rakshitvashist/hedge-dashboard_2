@@ -104,16 +104,11 @@ def get_current_portfolio(xl, sector_map):
     live_sheets = [s for s in sheets if s.startswith('LIVE_PERF_')]
     port_sheets = [s for s in sheets if s.startswith('Port_')]
 
-    curr_month = datetime.now().strftime('%Y-%m')   # e.g. '2026-05'
-
-    # Prefer the live sheet whose suffix is exactly the current month
-    current_live = next(
-        (s for s in live_sheets if s.endswith(curr_month)), None
-    )
-    # If no exact match, take the last live sheet that is NOT in the future
-    if current_live is None:
-        past_live = [s for s in live_sheets if s.replace('LIVE_PERF_', '') <= curr_month]
-        current_live = past_live[-1] if past_live else None
+    # Show the MOST RECENT live sheet. At month-end the engine writes NEXT
+    # month's basket (LIVE_MONTH = last completed month + 1), so the live
+    # portfolio shows the upcoming month's picks.
+    live_sorted = sorted(live_sheets, key=lambda s: s.replace('LIVE_PERF_', ''))
+    current_live = live_sorted[-1] if live_sorted else None
 
     target_sheet = current_live if current_live else (port_sheets[-1] if port_sheets else None)
     if not target_sheet:

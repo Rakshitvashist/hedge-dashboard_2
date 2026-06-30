@@ -29,12 +29,17 @@ DEEP_DIVE_FILE   = os.environ.get("DEEP_DIVE_FILE", "Hedge_Institutional_Deep_Di
 # Backtest period (override via START_MONTH env var; the SQE pipeline passes
 # 2019-12, the main dashboard's daily run uses the 2021-04 default).
 START_MONTH      = os.environ.get("START_MONTH", "2021-04")
-# END_MONTH is the last *analysis* month whose trade_month (port_month+1) is the current live month.
-# We stop at (current_month - 1) so that trade_month never goes beyond the current calendar month.
+# END_MONTH = last COMPLETED month. On the last calendar day of the month it
+# rolls to the current month, so the live portfolio (trade = END_MONTH+1) shows
+# NEXT month's basket. Otherwise END_MONTH is the previous month.
+import calendar as _cal
 _now             = datetime.now()
-_prev_month      = (_now.replace(day=1) - timedelta(days=1))
-END_MONTH        = _prev_month.strftime("%Y-%m")  # e.g. if now=May, END_MONTH=2026-04
-LIVE_MONTH       = _now.strftime("%Y-%m")         # e.g. 2026-05 — the current live trade month
+if _now.day >= _cal.monthrange(_now.year, _now.month)[1]:   # last date of month
+    _end_dt = _now.replace(day=1)                           # current month complete
+else:
+    _end_dt = (_now.replace(day=1) - timedelta(days=1)).replace(day=1)  # previous month
+END_MONTH        = _end_dt.strftime("%Y-%m")
+LIVE_MONTH       = (_end_dt + relativedelta(months=1)).strftime("%Y-%m")  # END_MONTH + 1 (upcoming)
 
 # Parameters
 MAX_WEIGHT       = 0.10     # Max 10% per stock
