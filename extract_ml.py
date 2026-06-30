@@ -73,6 +73,62 @@ def compute_metrics(r, b):
     }
 
 
+def _rolling_ret(r, w):
+    if len(r) < w:
+        return None
+    return float(((1 + r).rolling(window=w).apply(np.prod, raw=True) - 1).mean())
+
+
+def adv_metrics(returns, bench_returns, rf=RF):
+    """Full institutional metric set for the Executive Summary table — identical
+    formulas to the Hedge engine's get_advanced_metrics (som_hedge.py) so the ML
+    universe lines up with Nifty 50 / Nifty 500. Values are fractional for the %
+    metrics and raw for ratios (the dashboard scales the % ones)."""
+    r = pd.Series([x for x in returns if x is not None], dtype=float).reset_index(drop=True)
+    if len(r) == 0:
+        return {}
+    total_ret = float((1 + r).prod() - 1)
+    years = len(r) / 12.0
+    cagr = (1 + total_ret) ** (1 / years) - 1 if (total_ret > -1 and years > 0) else -1.0
+    vol = float(r.std() * np.sqrt(12))
+    dn = r[r < 0]
+    dvol = float(np.sqrt(np.mean(dn ** 2)) * np.sqrt(12)) if len(dn) > 0 else 0.001
+    cum = (1 + r).cumprod()
+    dd = (cum - cum.cummax()) / cum.cummax()
+    mdd = float(dd.min())
+    is_dd = dd < 0
+    dur = 0 if not is_dd.any() else int(is_dd.astype(int).groupby(is_dd.eq(0).cumsum()).cumsum().max())
+    v95, v99 = float(np.percentile(r, 5)), float(np.percentile(r, 1))
+    c95 = float(r[r <= v95].mean()); c99 = float(r[r <= v99].mean())
+    sharpe = (cagr - rf) / vol if vol > 0 else 0
+    sortino = (cagr - rf) / dvol if dvol > 0 else 0
+    calmar = cagr / abs(mdd) if abs(mdd) > 0 else 0
+    alpha = info = 0.0
+    b = pd.Series([x for x in bench_returns if x is not None], dtype=float).reset_index(drop=True)
+    if len(b):
+        ci = r.index.intersection(b.index)
+        rs, bs = r.loc[ci], b.loc[ci]
+        bcagr = (1 + ((1 + bs).prod() - 1)) ** (1 / years) - 1
+        alpha = cagr - bcagr
+        te = (rs - bs).std() * np.sqrt(12)
+        info = alpha / te if te > 0 else 0
+    wr = len(r[r > 0]) / len(r)
+    ag = float(r[r > 0].mean()) if not r[r > 0].empty else 0
+    al = float(r[r < 0].mean()) if not r[r < 0].empty else 0
+    pf = float(abs(r[r > 0].sum() / r[r < 0].sum())) if r[r < 0].sum() != 0 else 10.0
+    exp = (wr * ag) + ((1 - wr) * al)
+    return {
+        'CAGR': cagr, 'XIRR': cagr, 'Abs Return': total_ret, 'Alpha vs Bench': alpha,
+        'Volatility': vol, 'Downside Dev': dvol, 'Sharpe': float(sharpe),
+        'Sortino': float(sortino), 'Calmar': float(calmar), 'Max Drawdown': mdd,
+        'DD Duration (M)': float(dur), 'VaR 95%': v95, 'VaR 99%': v99,
+        'CVaR 95%': c95, 'CVaR 99%': c99, 'Info Ratio': float(info), 'Win Rate': wr,
+        'Profit Factor': pf, 'Expectancy': exp, 'Avg Gain': ag, 'Avg Loss': al,
+        'Rolling 1Y': _rolling_ret(r, 12), 'Rolling 3Y': _rolling_ret(r, 36),
+        'Best Month': float(r.max()), 'Worst Month': float(r.min()),
+    }
+
+
 def read_monthly():
     """Parse the 'Summary FULL' monthly table -> list of month dicts."""
     raw = pd.read_excel(WB, sheet_name='Summary FULL', header=None)
@@ -195,23 +251,20 @@ def main():
         cb *= (1 + (m['Base'] or 0)); cn *= (1 + (m['Bench'] or 0))
         eq_base.append(round(cb, 4)); eq_bench.append(round(cn, 4))
 
-    EX = ['CAGR', 'Volatility', 'Sharpe', 'Sortino', 'Calmar', 'Max Drawdown',
-          'Win Rate', 'Avg Gain', 'Avg Loss', 'Alpha vs Bench', 'Abs Return']
-    keymap = {'CAGR': 'CAGR', 'Volatility': 'Volatility', 'Sharpe': 'Sharpe',
-              'Sortino': 'Sortino', 'Calmar': 'Calmar', 'Max Drawdown': 'Max_DD',
-              'Win Rate': 'Win_Rate', 'Avg Gain': 'Avg_Gain', 'Avg Loss': 'Avg_Loss',
-              'Alpha vs Bench': 'Alpha', 'Abs Return': 'Total_Return'}
-    pct = {'CAGR', 'Volatility', 'Max Drawdown', 'Avg Gain', 'Avg Loss',
-           'Alpha vs Bench', 'Abs Return'}
+    # Full Executive Summary (24 metrics) computed with the Hedge engine's
+    # formulas so the table matches Nifty 50 / Nifty 500. Strategy in 'Base',
+    # both benchmark views collapse to the universe's own benchmark in 'Bench'.
+    em_base = adv_metrics(base, bench)
+    em_bench = adv_metrics(bench, bench)
+    avg_exa = round(float(np.mean([m['Ex_Ante_Sharpe'] for m in months])), 4)
     exec_summary = {}
-    for label in EX:
-        k = keymap[label]
-        bv = lm_base.get(k, 0); nv = lm_bench.get(k, 0)
-        # exec_summary values are fractional for % metrics, raw for ratios
-        exec_summary[label] = {
-            'Base': (bv / 100 if label in pct else bv),
-            'Bench': (nv / 100 if label in pct else nv),
+    for k in em_base:
+        bv, nv = em_base[k], em_bench.get(k, 0)
+        exec_summary[k] = {
+            'Base': None if bv is None else round(bv, 6),
+            'Bench': None if nv is None else round(nv, 6),
         }
+    exec_summary['Avg Ex-Ante Sharpe'] = {'Base': avg_exa, 'Bench': 0.0}
 
     universe = {
         'exec_summary': exec_summary,
